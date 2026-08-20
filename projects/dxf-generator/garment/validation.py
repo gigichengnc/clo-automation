@@ -13,8 +13,11 @@ def validate_garment_request(request: GarmentRequest) -> list[str]:
     """Return validation errors; an empty list means the request is valid."""
 
     errors = []
-    if not isfinite(request.requested_length):
+    value = request.requested_length
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        errors.append("requested_length must be numeric")
+    elif not isfinite(value):
         errors.append("requested_length must be a finite number")
-    elif request.requested_length <= 0:
+    elif value <= 0:
         errors.append("requested_length must be greater than 0 mm")
     return errors
