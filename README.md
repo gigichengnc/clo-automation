@@ -2,8 +2,15 @@
 
 > DXF generation · CLO automatic sewing · Blender garment workflows
 
-**Project period:** **Year 2 Summer Project — August 2026**  
-This is one of several technical projects across the user's university years. See [`docs/PROJECT_PERIOD.md`](docs/PROJECT_PERIOD.md) for the archive/date convention.
+## Project background
+
+**Year 2 Summer Project — August 2026**
+
+I started this project because I wanted to try designing and making my own clothes for everyday wear.
+
+That led me to learn how clothing pattern pieces are created, experiment with CLO3D and Marvelous Designer, follow new CLO3D features and updates, and gradually explore whether coding and AI could help automate parts of the process.
+
+What began as an experiment with DXF pattern pieces has grown into a larger project covering parametric pattern generation, automatic sewing in CLO3D, and eventually garment workflows in Blender.
 
 This repository is evolving from two garment-automation prototypes into a multi-project workspace built around a shared digital garment contract.
 
