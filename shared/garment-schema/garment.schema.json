@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/clo-automation/garment.schema.json",
+  "title": "Garment Automation Contract",
+  "type": "object",
+  "required": ["schema_version", "garment_id", "patterns", "seams"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1.0"
+    },
+    "garment_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "checksum": {"type": "string"}
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/pattern"}
+    },
+    "seams": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/seam"}
+    },
+    "mirror_relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_pattern", "result_pattern"],
+        "properties": {
+          "source_pattern": {"type": "string"},
+          "result_pattern": {"type": "string"},
+          "axis": {"enum": ["x", "y", "unspecified"]}
+        },
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "pattern": {
+      "type": "object",
+      "required": ["id", "edges"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "role": {"type": "string"},
+        "edges": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/edge"}
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "edge": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["outer", "internal", "unknown"]},
+        "length_mm": {"type": "number", "exclusiveMinimum": 0},
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "seam": {
+      "type": "object",
+      "required": ["id", "a", "b"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "a": {"type": "string", "minLength": 1},
+        "b": {"type": "string", "minLength": 1},
+        "orientation": {
+          "enum": ["same", "reverse", "unspecified"]
+        },
+        "required": {"type": "boolean", "default": true},
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
