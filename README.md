@@ -2,6 +2,9 @@
 
 > DXF generation · CLO automatic sewing · Blender garment workflows
 
+**Project period:** **Year 2 Summer Project — August 2026**  
+This is one of several technical projects across the user's university years. See [`docs/PROJECT_PERIOD.md`](docs/PROJECT_PERIOD.md) for the archive/date convention.
+
 This repository is evolving from two garment-automation prototypes into a multi-project workspace built around a shared digital garment contract.
 
 ## Projects
@@ -27,6 +30,7 @@ Read:
 - `AGENTS.md`
 - `docs/development-roadmap.md`
 - `docs/migration-plan.md`
+- `docs/PHASE2_PREP.md`
 
 ## Target pipeline
 
