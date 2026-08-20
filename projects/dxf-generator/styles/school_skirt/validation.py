@@ -10,6 +10,18 @@ All values use millimetres (mm).
 from math import isfinite
 
 
+def _validate_ease(name: str, value) -> list[str]:
+    """Return validation errors for one explicit ease value."""
+
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return [f"{name} must be numeric"]
+    if not isfinite(value):
+        return [f"{name} must be a finite number"]
+    if value < 0:
+        return [f"{name} must be greater than or equal to 0 mm"]
+    return []
+
+
 def validate_school_skirt_spec_inputs(
     *,
     waist_ease: float,
@@ -18,14 +30,6 @@ def validate_school_skirt_spec_inputs(
     """Return school-skirt specification errors; empty means valid."""
 
     errors = []
-    if not isfinite(waist_ease):
-        errors.append("waist_ease must be a finite number")
-    elif waist_ease < 0:
-        errors.append("waist_ease must be greater than or equal to 0 mm")
-
-    if not isfinite(hip_ease):
-        errors.append("hip_ease must be a finite number")
-    elif hip_ease < 0:
-        errors.append("hip_ease must be greater than or equal to 0 mm")
-
+    errors.extend(_validate_ease("waist_ease", waist_ease))
+    errors.extend(_validate_ease("hip_ease", hip_ease))
     return errors
