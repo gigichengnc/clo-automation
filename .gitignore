@@ -15,6 +15,7 @@ venv/
 CLO_Agent_v0.1/logs/
 CLO_Agent_v0.1/checkpoints/
 CLO_Agent_v0.1/state/current_state.json
+CLO_Agent_v0.1/state/clo_contract_probe.json
 CLO_Agent_v0.1/styles/*.draft.json
 DXF_AUTOMATION_V2/11/*.png
 
