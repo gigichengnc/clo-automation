@@ -54,6 +54,26 @@ class SchoolSkirtDraftRegressionTests(unittest.TestCase):
         self.assertEqual(draft.hem_half_width, 305.0)
         self.assertEqual(validate_school_skirt_draft(draft), [])
 
+    def test_legacy_w680_equivalent_upstream_values(self):
+        body = BodyMeasurements(
+            waist=680.0,
+            hip=920.0,
+            waist_to_hip=180.0,
+        )
+        request = GarmentRequest(requested_length=500.0)
+        spec = build_school_skirt_spec(body, request)
+        draft = build_school_skirt_draft(spec, SchoolSkirtDraftingParameters())
+
+        self.assertEqual(spec.garment_waist, 700.0)
+        self.assertEqual(spec.garment_hip, 920.0)
+        self.assertEqual(draft.quarter_waist, 175.0)
+        self.assertEqual(draft.quarter_hip, 230.0)
+        self.assertEqual(draft.quarter_suppression, 55.0)
+        self.assertEqual(draft.hip_position, 180.0)
+        self.assertEqual(draft.hem_position, 500.0)
+        self.assertEqual(draft.hem_half_width, 310.0)
+        self.assertEqual(validate_school_skirt_draft(draft), [])
+
     def test_length_equal_to_hip_depth_safe_stops(self):
         draft = self._build_draft(
             waist=700.0,
