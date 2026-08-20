@@ -38,16 +38,12 @@ def build_school_skirt_spec(
     waist_ease: float = DEFAULT_WAIST_EASE_MM,
     hip_ease: float = DEFAULT_HIP_EASE_MM,
 ) -> SchoolSkirtSpec:
-    """Resolve validated body and garment inputs into skirt measurements.
+    """Resolve validated inputs into school-skirt garment measurements.
 
-    Ease is explicit and separate from body measurements so later drafting code
-    does not need to guess whether an input value describes the body or garment.
+    Call the layer validators before this builder. Ease remains explicit so
+    downstream drafting code never needs to guess whether an input describes
+    the body or the finished garment.
     """
-
-    if waist_ease < 0:
-        raise ValueError("waist_ease must be greater than or equal to 0 mm")
-    if hip_ease < 0:
-        raise ValueError("hip_ease must be greater than or equal to 0 mm")
 
     return SchoolSkirtSpec(
         body_waist=body.waist,
