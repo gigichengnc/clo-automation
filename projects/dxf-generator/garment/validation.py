@@ -4,7 +4,7 @@ This module validates requested garment dimensions only. It contains no fit,
 drafting, geometry, or DXF logic.
 """
 
-from .request import GarmentRequest
+from garment.request import GarmentRequest
 
 
 def validate_garment_request(request: GarmentRequest) -> list[str]:
