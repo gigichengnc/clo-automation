@@ -13,7 +13,12 @@ from garment.request import GarmentRequest
 from garment.validation import validate_garment_request
 from measurements.body import BodyMeasurements
 from measurements.validation import validate_body_measurements
-from styles.school_skirt.spec import build_school_skirt_spec
+from styles.school_skirt.spec import (
+    DEFAULT_HIP_EASE_MM,
+    DEFAULT_WAIST_EASE_MM,
+    build_school_skirt_spec,
+)
+from styles.school_skirt.validation import validate_school_skirt_spec_inputs
 
 
 _BODY_FIELDS = (
@@ -114,17 +119,19 @@ def main() -> int:
 
     errors = validate_body_measurements(body)
     errors.extend(validate_garment_request(request))
+    errors.extend(
+        validate_school_skirt_spec_inputs(
+            waist_ease=DEFAULT_WAIST_EASE_MM,
+            hip_ease=DEFAULT_HIP_EASE_MM,
+        )
+    )
     if errors:
         print("\nInputs are not valid:")
         for error in errors:
             print(f"- {error}")
         return 1
 
-    try:
-        spec = build_school_skirt_spec(body, request)
-    except ValueError as exc:
-        print(f"\nGarment specification is not valid: {exc}")
-        return 1
+    spec = build_school_skirt_spec(body, request)
 
     print("\nBody measurements accepted:")
     print(f"- waist: {body.waist:.1f} mm")
