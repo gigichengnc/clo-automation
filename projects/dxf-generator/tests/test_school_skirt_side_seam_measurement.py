@@ -92,7 +92,7 @@ class SchoolSkirtSideSeamMeasurementTests(unittest.TestCase):
 
         with self.assertRaisesRegex(
             ValueError,
-            r"path\.points\[1\]\.x must be a finite number",
+            r"path\.points\[1\]\.x must be a finite number".replace("\\\\", "\\"),
         ):
             measure_path_length(path)
 
