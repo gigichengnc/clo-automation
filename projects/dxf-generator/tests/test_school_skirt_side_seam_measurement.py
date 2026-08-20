@@ -90,11 +90,13 @@ class SchoolSkirtSideSeamMeasurementTests(unittest.TestCase):
             points=(Point2D(0.0, 0.0), Point2D(math.nan, -500.0))
         )
 
-        with self.assertRaisesRegex(
-            ValueError,
-            r"path\.points\[1\]\.x must be a finite number".replace("\\\\", "\\"),
-        ):
+        with self.assertRaises(ValueError) as context:
             measure_path_length(path)
+
+        self.assertEqual(
+            str(context.exception),
+            "path.points[1].x must be a finite number",
+        )
 
 
 if __name__ == "__main__":
