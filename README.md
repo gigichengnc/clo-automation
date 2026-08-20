@@ -32,6 +32,10 @@ cd CLO_Agent_v0.1 && python CLO_Agent.py && python selftest.py   # runs the synt
 ```
 The bundled demo goes `FRESH 4/0 → MIRRORED 5/0 → SAFE_CHECKPOINT 5/3`.
 
+## Diagrams
+See [`docs/architecture.md`](docs/architecture.md) — pipeline flow, state machine, module
+architecture, the two-tool connection, and the InnerShape guard (rendered on GitHub).
+
 ## Milestone (real No.11, local data)
 With the local `styles/11.json`: `FRESH 11/0` → `MIRRORED 13/0` → `SAFE_CHECKPOINT 13/9`,
 no simulation, no duplicate seams, no yoke/InnerShape error.
