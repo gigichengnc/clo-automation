@@ -6,7 +6,7 @@ rules, body-range assumptions, ease, and drafting constraints belong in later
 layers.
 """
 
-from .body import BodyMeasurements
+from measurements.body import BodyMeasurements
 
 
 _REQUIRED_FIELDS = (
