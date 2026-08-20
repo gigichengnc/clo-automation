@@ -7,6 +7,8 @@ later layers.
 All values use millimetres (mm).
 """
 
+from math import isfinite
+
 
 def validate_school_skirt_spec_inputs(
     *,
@@ -16,8 +18,14 @@ def validate_school_skirt_spec_inputs(
     """Return school-skirt specification errors; empty means valid."""
 
     errors = []
-    if waist_ease < 0:
+    if not isfinite(waist_ease):
+        errors.append("waist_ease must be a finite number")
+    elif waist_ease < 0:
         errors.append("waist_ease must be greater than or equal to 0 mm")
-    if hip_ease < 0:
+
+    if not isfinite(hip_ease):
+        errors.append("hip_ease must be a finite number")
+    elif hip_ease < 0:
         errors.append("hip_ease must be greater than or equal to 0 mm")
+
     return errors
