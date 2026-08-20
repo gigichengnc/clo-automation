@@ -1,13 +1,15 @@
-"""School-skirt garment specification derived from body measurements.
+"""School-skirt garment specification derived from validated inputs.
 
-This module separates body measurements from garment measurements. It contains
-no pattern geometry and does not generate or modify DXF files.
+This module separates body measurements, garment requests, and resolved garment
+measurements. It contains no pattern geometry and does not generate or modify
+DXF files.
 
 All values use millimetres (mm).
 """
 
 from dataclasses import dataclass
 
+from garment.request import GarmentRequest
 from measurements.body import BodyMeasurements
 
 
@@ -31,11 +33,12 @@ class SchoolSkirtSpec:
 
 def build_school_skirt_spec(
     body: BodyMeasurements,
+    request: GarmentRequest,
     *,
     waist_ease: float = DEFAULT_WAIST_EASE_MM,
     hip_ease: float = DEFAULT_HIP_EASE_MM,
 ) -> SchoolSkirtSpec:
-    """Resolve body measurements into school-skirt garment measurements.
+    """Resolve validated body and garment inputs into skirt measurements.
 
     Ease is explicit and separate from body measurements so later drafting code
     does not need to guess whether an input value describes the body or garment.
@@ -52,7 +55,7 @@ def build_school_skirt_spec(
         garment_waist=body.waist + waist_ease,
         garment_hip=body.hip + hip_ease,
         waist_to_hip=body.waist_to_hip,
-        skirt_length=body.garment_length,
+        skirt_length=request.requested_length,
         waist_ease=waist_ease,
         hip_ease=hip_ease,
     )
