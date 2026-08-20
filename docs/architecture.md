@@ -1,3 +1,12 @@
+# Legacy v0.1 Architecture Snapshot
+
+> [!WARNING]
+> This file is a **historical snapshot of the original CLO_Agent v0.1 design from the Year 2 Summer Project — August 2026**. It is **not** the current architecture or API authority.
+>
+> Use [`../ARCHITECTURE.md`](../ARCHITECTURE.md) for the current multi-project architecture and [`../KNOWN_ISSUES.md`](../KNOWN_ISSUES.md) for known safety/API problems.
+>
+> Statements below about “verified” API calls, count-based `SAFE_CHECKPOINT`, the two-step `AddSeamlinePairGroup + AddSeamlinePair` workflow, or InnerShape being inaccessible are preserved only to document what v0.1 originally assumed. Phase 2 must re-verify those assumptions against the installed CLO runtime/API stubs.
+
 # Architecture & flow
 
 Diagrams render natively on GitHub (Mermaid). All examples use the synthetic `demo` style.
