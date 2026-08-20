@@ -32,12 +32,32 @@ class NumericInputValidationTests(unittest.TestCase):
             ["waist must be a finite number"],
         )
 
+    def test_body_boolean_is_rejected(self):
+        body = BodyMeasurements(
+            waist=True,
+            hip=900.0,
+            waist_to_hip=200.0,
+        )
+
+        self.assertEqual(
+            validate_body_measurements(body),
+            ["waist must be numeric"],
+        )
+
     def test_garment_infinity_is_rejected(self):
         request = GarmentRequest(requested_length=math.inf)
 
         self.assertEqual(
             validate_garment_request(request),
             ["requested_length must be a finite number"],
+        )
+
+    def test_garment_string_is_rejected(self):
+        request = GarmentRequest(requested_length="500")
+
+        self.assertEqual(
+            validate_garment_request(request),
+            ["requested_length must be numeric"],
         )
 
     def test_non_finite_ease_is_rejected(self):
@@ -50,6 +70,15 @@ class NumericInputValidationTests(unittest.TestCase):
                 "waist_ease must be a finite number",
                 "hip_ease must be a finite number",
             ],
+        )
+
+    def test_boolean_ease_is_rejected(self):
+        self.assertEqual(
+            validate_school_skirt_spec_inputs(
+                waist_ease=True,
+                hip_ease=0.0,
+            ),
+            ["waist_ease must be numeric"],
         )
 
     def test_json_boolean_dimension_is_rejected(self):
