@@ -17,6 +17,7 @@ from measurements.validation import validate_body_measurements
 from styles.school_skirt.draft import build_school_skirt_draft
 from styles.school_skirt.draft_validation import validate_school_skirt_draft
 from styles.school_skirt.parameters import SchoolSkirtDraftingParameters
+from styles.school_skirt.parameters_validation import validate_school_skirt_parameters
 from styles.school_skirt.spec import (
     DEFAULT_HIP_EASE_MM,
     DEFAULT_WAIST_EASE_MM,
@@ -134,6 +135,8 @@ def main() -> int:
         print(f"Input error: {exc}")
         return 2
 
+    parameters = SchoolSkirtDraftingParameters()
+
     errors = validate_body_measurements(body)
     errors.extend(validate_garment_request(request))
     errors.extend(
@@ -142,6 +145,7 @@ def main() -> int:
             hip_ease=DEFAULT_HIP_EASE_MM,
         )
     )
+    errors.extend(validate_school_skirt_parameters(parameters))
     if errors:
         print("\nInputs are not valid:")
         for error in errors:
@@ -149,7 +153,6 @@ def main() -> int:
         return 1
 
     spec = build_school_skirt_spec(body, request)
-    parameters = SchoolSkirtDraftingParameters()
     draft = build_school_skirt_draft(spec, parameters)
 
     draft_errors = validate_school_skirt_draft(draft)
