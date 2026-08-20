@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "garment_metadata",
+  "type": "object",
+  "required": ["style", "unit", "patterns"],
+  "properties": {
+    "style": { "type": "string" },
+    "unit": { "type": "string", "enum": ["mm"] },
+    "size": { "type": "string" },
+    "display_name": { "type": "string" },
+    "source_dxf": { "type": "string" },
+    "opening": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "location": { "type": "string" },
+        "length_mm": { "type": "number" },
+        "seam_allowance_mm": { "type": "number" }
+      }
+    },
+    "patterns": {
+      "type": "object",
+      "description": "machine-ID (ASCII) -> pattern definition",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["quantity", "mirror", "edges"],
+        "properties": {
+          "source_name": { "type": "string", "description": "display name (may be Chinese)" },
+          "source_block": { "type": "string" },
+          "quantity": { "type": "integer", "minimum": 1 },
+          "mirror": { "type": "boolean" },
+          "bbox_mm": { "type": "array", "items": { "type": "number" }, "minItems": 4, "maxItems": 4 },
+          "edges": {
+            "type": "object",
+            "description": "edge-ID (ASCII) -> edge definition. edge identity is the two corner endpoints, robust to CLO curve optimization.",
+            "additionalProperties": {
+              "type": "object",
+              "required": ["line_index", "expected_length_mm", "start_xy", "end_xy"],
+              "properties": {
+                "line_index": { "type": "integer", "description": "ordinal of this edge around the outline (0-based)" },
+                "role": { "type": "string", "enum": ["seam", "free", "end"] },
+                "expected_length_mm": { "type": "number" },
+                "start_xy": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+                "end_xy": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+              }
+            }
+          },
+          "notches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["edge_id", "kind", "xy"],
+              "properties": {
+                "edge_id": { "type": "string" },
+                "kind": { "type": "string", "enum": ["midpoint", "zipper_stop", "center_back", "start", "end", "match"] },
+                "xy": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+              }
+            }
+          },
+          "grainline": {
+            "type": ["object", "null"],
+            "properties": {
+              "p0": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+              "p1": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+            }
+          }
+        }
+      }
+    },
+    "interfaces": { "type": "object", "additionalProperties": { "type": "number" } }
+  }
+}

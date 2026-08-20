@@ -1,0 +1,29 @@
+{
+  "style": "demo",
+  "display_name": "SYNTHETIC DEMO garment (fake numbers, not a real pattern)",
+  "unit": "mm",
+  "tolerance_mm": 6.0,
+  "_comment": "All numbers here are invented round values to demonstrate the framework end-to-end without shipping any real garment measurements. Real style configs (e.g. 11.json) are kept local and NOT published. Copy this shape and fill with your own CLO-probed signatures.",
+
+  "state_machine": {
+    "FRESH":           { "pattern_count": 4, "sewing_groups": 0 },
+    "MIRRORED":        { "pattern_count": 5, "sewing_groups": 0 },
+    "SAFE_CHECKPOINT": { "pattern_count": 5, "sewing_groups": 3 }
+  },
+
+  "patterns": {
+    "DEMO_FRONT":  { "quantity": 1, "signature": [280.0, 500.0, 280.0, 400.0] },
+    "DEMO_SIDE_L": { "quantity": 1, "signature": [281.0, 220.0], "side": "L" },
+    "DEMO_SIDE_R": { "quantity": 1, "signature": [281.0, 220.0], "side": "R" },
+    "DEMO_BACK":   { "quantity": 1, "signature": [266.0, 270.0, 190.0], "mirror_source": true }
+  },
+
+  "mirror_sources": ["DEMO_BACK"],
+  "mirror_result": { "DEMO_BACK": ["DEMO_BACK_L", "DEMO_BACK_R"] },
+
+  "safe_seams": [
+    { "id": "S_FRONT_PRINCESS_L", "a": {"pattern": "DEMO_FRONT", "length": 280.0, "pick": "left"},  "b": {"pattern": "DEMO_SIDE_L", "length": 281.0} },
+    { "id": "S_FRONT_PRINCESS_R", "a": {"pattern": "DEMO_FRONT", "length": 280.0, "pick": "right"}, "b": {"pattern": "DEMO_SIDE_R", "length": 281.0} },
+    { "id": "S_CENTER_BACK",      "a": {"pattern": "DEMO_BACK_L", "length": 270.0}, "b": {"pattern": "DEMO_BACK_R", "length": 270.0} }
+  ]
+}

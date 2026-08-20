@@ -1,0 +1,9 @@
+{
+  "_comment": "SYNTHETIC MOCK fixture for the demo style — fake numbers only. Represents a FRESH import (4 patterns, 0 seams) so CLO_Agent runs OUTSIDE CLO. Not a real garment.",
+  "patterns": [
+    { "semantic": "DEMO_FRONT",  "sig": [280.0, 500.0, 280.0, 400.0], "centroid": [0, 0] },
+    { "semantic": "DEMO_SIDE_L", "sig": [281.0, 220.0], "centroid": [-200, 0] },
+    { "semantic": "DEMO_SIDE_R", "sig": [281.0, 220.0], "centroid": [200, 0] },
+    { "semantic": "DEMO_BACK",   "sig": [266.0, 270.0, 190.0], "centroid": [-150, -400] }
+  ]
+}
