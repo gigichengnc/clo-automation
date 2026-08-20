@@ -1,8 +1,8 @@
 """Minimal CLI for the first parametric sizing prototype.
 
 The CLI can collect four measurements interactively or load them from a JSON
-file, then builds BodyMeasurements and runs validation. It does not generate or
-modify any DXF files.
+file, then builds BodyMeasurements, runs validation, and resolves a school-skirt
+garment specification. It does not generate or modify any DXF files.
 """
 
 import argparse
@@ -11,6 +11,7 @@ from pathlib import Path
 
 from measurements.body import BodyMeasurements
 from measurements.validation import validate_body_measurements
+from styles.school_skirt.spec import build_school_skirt_spec
 
 
 _FIELDS = (
@@ -98,11 +99,22 @@ def main() -> int:
             print(f"- {error}")
         return 1
 
-    print("\nMeasurements accepted:")
+    spec = build_school_skirt_spec(measurements)
+
+    print("\nBody measurements accepted:")
     print(f"- waist: {measurements.waist:.1f} mm")
     print(f"- hip: {measurements.hip:.1f} mm")
     print(f"- waist_to_hip: {measurements.waist_to_hip:.1f} mm")
     print(f"- garment_length: {measurements.garment_length:.1f} mm")
+
+    print("\nSchool-skirt garment measurements:")
+    print(f"- garment_waist: {spec.garment_waist:.1f} mm")
+    print(f"- garment_hip: {spec.garment_hip:.1f} mm")
+    print(f"- waist_to_hip: {spec.waist_to_hip:.1f} mm")
+    print(f"- skirt_length: {spec.skirt_length:.1f} mm")
+    print(f"- waist_ease: {spec.waist_ease:.1f} mm")
+    print(f"- hip_ease: {spec.hip_ease:.1f} mm")
+
     print("\nNo DXF has been generated yet.")
     return 0
 
