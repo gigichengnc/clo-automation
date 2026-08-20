@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/clo-automation/garment.schema.json",
+  "$id": "urn:clo-automation:garment-schema:0.1.0",
   "title": "Garment Automation Contract",
   "type": "object",
   "required": ["schema_version", "garment_id", "patterns", "seams"],
