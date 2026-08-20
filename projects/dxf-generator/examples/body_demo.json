@@ -1,6 +1,11 @@
 {
-  "waist": 680.0,
-  "hip": 940.0,
-  "waist_to_hip": 200.0,
-  "garment_length": 550.0
+  "_comment": "synthetic demo measurements, not a real person",
+  "body": {
+    "waist": 700.0,
+    "hip": 1000.0,
+    "waist_to_hip": 200.0
+  },
+  "garment": {
+    "requested_length": 600.0
+  }
 }
