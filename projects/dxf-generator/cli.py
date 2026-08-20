@@ -1,8 +1,9 @@
 """Minimal CLI for the first parametric sizing prototype.
 
 The CLI can collect body measurements and a garment request interactively or
-load them from JSON, validate each layer, and resolve a school-skirt garment
-specification. It does not generate or modify any DXF files.
+load them from JSON, validate each layer, resolve a school-skirt garment
+specification, and derive policy-independent draft values. It does not generate
+or modify any DXF files.
 """
 
 import argparse
@@ -13,6 +14,9 @@ from garment.request import GarmentRequest
 from garment.validation import validate_garment_request
 from measurements.body import BodyMeasurements
 from measurements.validation import validate_body_measurements
+from styles.school_skirt.draft import build_school_skirt_draft
+from styles.school_skirt.draft_validation import validate_school_skirt_draft
+from styles.school_skirt.parameters import SchoolSkirtDraftingParameters
 from styles.school_skirt.spec import (
     DEFAULT_HIP_EASE_MM,
     DEFAULT_WAIST_EASE_MM,
@@ -132,6 +136,15 @@ def main() -> int:
         return 1
 
     spec = build_school_skirt_spec(body, request)
+    parameters = SchoolSkirtDraftingParameters()
+    draft = build_school_skirt_draft(spec, parameters)
+
+    draft_errors = validate_school_skirt_draft(draft)
+    if draft_errors:
+        print("\nDraft cannot continue safely:")
+        for error in draft_errors:
+            print(f"- {error}")
+        return 1
 
     print("\nBody measurements accepted:")
     print(f"- waist: {body.waist:.1f} mm")
@@ -149,7 +162,16 @@ def main() -> int:
     print(f"- waist_ease: {spec.waist_ease:.1f} mm")
     print(f"- hip_ease: {spec.hip_ease:.1f} mm")
 
-    print("\nNo DXF has been generated yet.")
+    print("\nPolicy-independent school-skirt draft:")
+    print(f"- quarter_waist: {draft.quarter_waist:.1f} mm")
+    print(f"- quarter_hip: {draft.quarter_hip:.1f} mm")
+    print(f"- quarter_suppression: {draft.quarter_suppression:.1f} mm")
+    print(f"- hip_position: {draft.hip_position:.1f} mm")
+    print(f"- hem_position: {draft.hem_position:.1f} mm")
+    print(f"- hem_half_width: {draft.hem_half_width:.1f} mm")
+
+    print("\nNo dart-allocation policy has been applied.")
+    print("No DXF has been generated yet.")
     return 0
 
 
