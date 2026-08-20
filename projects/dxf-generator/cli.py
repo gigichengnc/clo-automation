@@ -45,6 +45,16 @@ def _read_mm(label: str) -> float:
         raise ValueError(f"{label} must be a number") from exc
 
 
+def _json_number(value, field_name: str) -> float:
+    """Convert one JSON numeric value while rejecting booleans explicitly."""
+    if isinstance(value, bool):
+        raise ValueError(f"{field_name} must be numeric, not boolean")
+    try:
+        return float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be numeric") from exc
+
+
 def _read_interactive() -> tuple[BodyMeasurements, GarmentRequest]:
     """Collect body measurements and the garment request from standard input."""
     body = BodyMeasurements(
@@ -85,11 +95,14 @@ def _read_json(path: Path) -> tuple[BodyMeasurements, GarmentRequest]:
     if missing_garment:
         raise ValueError(f"missing garment field(s): {', '.join(missing_garment)}")
 
-    try:
-        body_values = {field: float(body_data[field]) for field in _BODY_FIELDS}
-        garment_values = {field: float(garment_data[field]) for field in _GARMENT_FIELDS}
-    except (TypeError, ValueError) as exc:
-        raise ValueError("all measurements and garment dimensions must be numeric") from exc
+    body_values = {
+        field: _json_number(body_data[field], f"body.{field}")
+        for field in _BODY_FIELDS
+    }
+    garment_values = {
+        field: _json_number(garment_data[field], f"garment.{field}")
+        for field in _GARMENT_FIELDS
+    }
 
     return BodyMeasurements(**body_values), GarmentRequest(**garment_values)
 
