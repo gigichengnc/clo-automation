@@ -1,8 +1,9 @@
 """Validation for user-supplied body measurements.
 
 This first version intentionally keeps the rules minimal. It only verifies that
-all required measurements are greater than zero. Garment-specific fit rules,
-body-range assumptions, ease, and drafting constraints belong in later layers.
+all required body measurements are greater than zero. Garment-specific fit
+rules, body-range assumptions, ease, and drafting constraints belong in later
+layers.
 """
 
 from .body import BodyMeasurements
@@ -12,7 +13,6 @@ _REQUIRED_FIELDS = (
     "waist",
     "hip",
     "waist_to_hip",
-    "garment_length",
 )
 
 
