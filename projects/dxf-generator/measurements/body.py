@@ -15,4 +15,3 @@ class BodyMeasurements:
     waist: float
     hip: float
     waist_to_hip: float
-    garment_length: float
