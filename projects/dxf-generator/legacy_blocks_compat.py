@@ -1,22 +1,23 @@
 """Forensic compatibility layer for the lost legacy ``blocks.py`` helper.
 
-This module reconstructs only behavior that is observable from surviving legacy
-callers and generated DXFs. It is NOT an authoritative production DXF parser
-and must not be used by the new parametric drafting engine.
+This module reconstructs only behavior needed to replay surviving legacy callers
+and generated DXFs. It is NOT an authoritative production DXF parser and must
+not be used by the new parametric drafting engine.
 
-Verified legacy behavior reconstructed here:
+Compatibility behavior reconstructed here:
 - ``parse(path)`` reads ANSI/AAMA BLOCKS and exposes ``polys`` / ``texts``.
-- when a source repeats the same BLOCK name (shell/lining variants), the first
-  occurrence wins. This is required to reproduce Claude-generated copies made
-  from purchased ``2.dxf``.
+- this reconstruction uses *first duplicate BLOCK occurrence wins*. That choice
+  reproduces observed Claude-era direct-copy outputs, but the original lost
+  implementation is not available and the surviving copied pieces do not
+  uniquely rule out every alternative duplicate-selection heuristic.
 - ``upright(block)`` takes layer-14 as net geometry and layer-1 as cut geometry,
   centers both using the layer-14 point centroid, and rotates the layer-7
   grainline direction onto +Y.
 
 The third return value of the lost function is not consumed by any surviving
 caller. This reconstruction returns the transformed grainline when present.
-That choice is useful but is NOT claimed as a verified byte-for-byte behavior
-of the lost source.
+That choice is useful but is NOT claimed as verified byte-for-byte behavior of
+the lost source.
 """
 
 from __future__ import annotations
