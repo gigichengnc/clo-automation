@@ -5,10 +5,11 @@ import json
 from pathlib import Path
 
 from .dxf import render_dxf
-from .fashion_flat import DressSpec, build_dress_flat
+from .fashion_flat import DressSpec
 from .prompt import PromptParseError, parse_prompt
 from .svg import render_svg
 from .validation import validate_drawing
+from .views import build_dress_view
 
 
 def _load_spec(spec_path: Path | None, prompt: str | None) -> DressSpec:
@@ -37,6 +38,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Generate deterministic vector fashion flats")
     parser.add_argument("spec", type=Path, nargs="?", help="JSON garment specification")
     parser.add_argument("--prompt", help="strict natural-language garment description")
+    parser.add_argument("--view", choices=("front", "back"), default="front", help="technical-flat view")
     parser.add_argument("--svg", type=Path, required=True, help="SVG output path")
     parser.add_argument("--dxf", type=Path, help="optional standard DXF artwork output")
     parser.add_argument(
@@ -47,7 +49,7 @@ def main() -> None:
     args = parser.parse_args()
 
     spec = _load_spec(args.spec, args.prompt)
-    drawing = build_dress_flat(spec)
+    drawing = build_dress_view(spec, view=args.view)
 
     if args.validate:
         report = validate_drawing(drawing)
