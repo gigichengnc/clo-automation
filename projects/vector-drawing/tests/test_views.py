@@ -60,6 +60,44 @@ class FlatViewTests(unittest.TestCase):
         self.assertTrue(validate_drawing(views["front"]).passed)
         self.assertTrue(validate_drawing(views["back"]).passed)
 
+    def test_front_waist_dart_pair_is_semantic_and_valid(self):
+        spec = DressSpec(front_darts="waist_pair")
+        front = build_dress_front_flat(spec)
+        self.assertEqual(len(front.paths_by_role("dart.front.left")), 1)
+        self.assertEqual(len(front.paths_by_role("dart.front.right")), 1)
+        self.assertEqual(len(front.paths_by_role("dart.back.left")), 0)
+        self.assertTrue(validate_drawing(front).passed)
+
+    def test_back_replaces_front_darts_with_back_darts(self):
+        spec = DressSpec(
+            neckline="round",
+            sleeve="short",
+            silhouette="a_line",
+            length="midi",
+            back_neckline="shallow_round",
+            back_closure="centre_zip",
+            front_darts="waist_pair",
+            back_darts="waist_pair",
+        )
+        front = build_dress_front_flat(spec)
+        back = build_dress_back_flat(spec)
+
+        self.assertEqual(len(front.paths_by_role("dart.front.left")), 1)
+        self.assertEqual(len(front.paths_by_role("dart.back.left")), 0)
+        self.assertEqual(len(back.paths_by_role("dart.front.left")), 0)
+        self.assertEqual(len(back.paths_by_role("dart.back.left")), 1)
+        self.assertEqual(len(back.paths_by_role("dart.back.right")), 1)
+        self.assertTrue(validate_drawing(front).passed)
+        self.assertTrue(validate_drawing(back).passed)
+
+    def test_explicit_none_and_unspecified_both_draw_no_dart_but_remain_distinct_in_spec(self):
+        unspecified = DressSpec(front_darts=None)
+        confirmed_none = DressSpec(front_darts="none")
+        self.assertIsNone(unspecified.front_darts)
+        self.assertEqual(confirmed_none.front_darts, "none")
+        self.assertEqual(len(build_dress_front_flat(unspecified).paths_by_role("dart.front.left")), 0)
+        self.assertEqual(len(build_dress_front_flat(confirmed_none).paths_by_role("dart.front.left")), 0)
+
     def test_invalid_view_safe_stops(self):
         with self.assertRaises(ValueError):
             build_dress_view(DressSpec(), view="side")
