@@ -1,4 +1,4 @@
-"""Regression tests for school-skirt suppression-allocation validation."""
+"""Regression tests for school-skirt suppression-target/allocation validation."""
 
 import math
 import sys
@@ -12,9 +12,11 @@ if str(PROJECT_ROOT) not in sys.path:
 from styles.school_skirt.draft import SchoolSkirtDraft
 from styles.school_skirt.suppression import (
     PanelSuppressionAllocation,
+    PanelSuppressionTargets,
     SchoolSkirtSuppressionAllocation,
 )
 from styles.school_skirt.suppression_validation import (
+    validate_school_skirt_panel_suppression_targets,
     validate_school_skirt_suppression_allocation,
 )
 
@@ -30,7 +32,32 @@ class SchoolSkirtSuppressionValidationTests(unittest.TestCase):
             hem_half_width=305.0,
         )
 
-    def test_valid_allocation_conserves_suppression(self):
+    def test_symmetric_panel_targets_conserve_half_garment_suppression(self):
+        targets = PanelSuppressionTargets(front=45.0, back=45.0)
+        self.assertEqual(
+            validate_school_skirt_panel_suppression_targets(self._draft(), targets),
+            [],
+        )
+
+    def test_asymmetric_panel_targets_are_valid_when_total_is_conserved(self):
+        targets = PanelSuppressionTargets(front=37.5, back=52.5)
+        self.assertEqual(
+            validate_school_skirt_panel_suppression_targets(self._draft(), targets),
+            [],
+        )
+
+    def test_panel_targets_must_conserve_global_requirement(self):
+        targets = PanelSuppressionTargets(front=40.0, back=40.0)
+        self.assertEqual(
+            validate_school_skirt_panel_suppression_targets(self._draft(), targets),
+            [
+                "front + back suppression targets must equal twice "
+                "quarter_suppression (90.0 mm)"
+            ],
+        )
+
+    def test_valid_allocation_matches_explicit_panel_targets(self):
+        targets = PanelSuppressionTargets(front=45.0, back=45.0)
         allocation = SchoolSkirtSuppressionAllocation(
             front=PanelSuppressionAllocation(
                 dart_intake_total=20.0,
@@ -43,11 +70,30 @@ class SchoolSkirtSuppressionValidationTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            validate_school_skirt_suppression_allocation(self._draft(), allocation),
+            validate_school_skirt_suppression_allocation(targets, allocation),
             [],
         )
 
-    def test_front_total_must_equal_quarter_suppression(self):
+    def test_asymmetric_allocation_matches_asymmetric_targets(self):
+        targets = PanelSuppressionTargets(front=47.5, back=62.5)
+        allocation = SchoolSkirtSuppressionAllocation(
+            front=PanelSuppressionAllocation(
+                dart_intake_total=20.0,
+                side_shaping=27.5,
+            ),
+            back=PanelSuppressionAllocation(
+                dart_intake_total=40.0,
+                side_shaping=22.5,
+            ),
+        )
+
+        self.assertEqual(
+            validate_school_skirt_suppression_allocation(targets, allocation),
+            [],
+        )
+
+    def test_front_total_must_equal_explicit_front_target(self):
+        targets = PanelSuppressionTargets(front=45.0, back=45.0)
         allocation = SchoolSkirtSuppressionAllocation(
             front=PanelSuppressionAllocation(
                 dart_intake_total=20.0,
@@ -60,11 +106,15 @@ class SchoolSkirtSuppressionValidationTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            validate_school_skirt_suppression_allocation(self._draft(), allocation),
-            ["front suppression allocation must equal quarter_suppression (45.0 mm)"],
+            validate_school_skirt_suppression_allocation(targets, allocation),
+            [
+                "front suppression allocation must equal its explicit panel "
+                "target (45.0 mm)"
+            ],
         )
 
     def test_negative_component_is_rejected(self):
+        targets = PanelSuppressionTargets(front=45.0, back=45.0)
         allocation = SchoolSkirtSuppressionAllocation(
             front=PanelSuppressionAllocation(
                 dart_intake_total=-1.0,
@@ -77,43 +127,23 @@ class SchoolSkirtSuppressionValidationTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            validate_school_skirt_suppression_allocation(self._draft(), allocation),
+            validate_school_skirt_suppression_allocation(targets, allocation),
             ["front.dart_intake_total must be greater than or equal to 0 mm"],
         )
 
-    def test_non_finite_component_is_rejected(self):
-        allocation = SchoolSkirtSuppressionAllocation(
-            front=PanelSuppressionAllocation(
-                dart_intake_total=math.nan,
-                side_shaping=45.0,
-            ),
-            back=PanelSuppressionAllocation(
-                dart_intake_total=30.0,
-                side_shaping=15.0,
-            ),
-        )
-
+    def test_non_finite_panel_target_is_rejected(self):
+        targets = PanelSuppressionTargets(front=math.nan, back=45.0)
         self.assertEqual(
-            validate_school_skirt_suppression_allocation(self._draft(), allocation),
-            ["front.dart_intake_total must be a finite number"],
+            validate_school_skirt_panel_suppression_targets(self._draft(), targets),
+            ["targets.front must be a finite number"],
         )
 
     def test_negative_required_suppression_safe_stops(self):
-        allocation = SchoolSkirtSuppressionAllocation(
-            front=PanelSuppressionAllocation(
-                dart_intake_total=0.0,
-                side_shaping=0.0,
-            ),
-            back=PanelSuppressionAllocation(
-                dart_intake_total=0.0,
-                side_shaping=0.0,
-            ),
-        )
-
+        targets = PanelSuppressionTargets(front=0.0, back=0.0)
         self.assertEqual(
-            validate_school_skirt_suppression_allocation(
+            validate_school_skirt_panel_suppression_targets(
                 self._draft(quarter_suppression=-5.0),
-                allocation,
+                targets,
             ),
             [
                 "quarter_suppression must be greater than or equal to 0 mm "
@@ -122,6 +152,7 @@ class SchoolSkirtSuppressionValidationTests(unittest.TestCase):
         )
 
     def test_tiny_floating_point_difference_is_tolerated(self):
+        targets = PanelSuppressionTargets(front=45.0, back=45.0000004)
         allocation = SchoolSkirtSuppressionAllocation(
             front=PanelSuppressionAllocation(
                 dart_intake_total=20.0,
@@ -134,7 +165,11 @@ class SchoolSkirtSuppressionValidationTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            validate_school_skirt_suppression_allocation(self._draft(), allocation),
+            validate_school_skirt_panel_suppression_targets(self._draft(), targets),
+            [],
+        )
+        self.assertEqual(
+            validate_school_skirt_suppression_allocation(targets, allocation),
             [],
         )
 
