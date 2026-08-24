@@ -84,6 +84,18 @@ class SchoolSkirtProductionGateTests(unittest.TestCase):
         )
         self.assertFalse(gate.ready_for_pattern_geometry)
 
+    def test_suppression_is_split_into_two_explicit_production_blockers(self):
+        gate = self._build_gate()
+
+        self.assertEqual(
+            gate.assessment("panel_suppression_target_policy").status,
+            ProductionGateStatus.NEEDS_RULE,
+        )
+        self.assertEqual(
+            gate.assessment("suppression_allocation_policy").status,
+            ProductionGateStatus.NEEDS_RULE,
+        )
+
     def test_unresolved_production_rules_remain_explicit_blockers(self):
         gate = self._build_gate()
         blockers = {item.requirement for item in gate.blockers}
@@ -91,7 +103,8 @@ class SchoolSkirtProductionGateTests(unittest.TestCase):
         self.assertTrue(
             {
                 "drafting_parameter_provenance",
-                "suppression_policy",
+                "panel_suppression_target_policy",
+                "suppression_allocation_policy",
                 "dart_distribution_policy",
                 "dart_placement_policy",
                 "side_seam_policy",
