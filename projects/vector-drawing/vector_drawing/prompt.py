@@ -105,10 +105,41 @@ _ALIASES: dict[str, dict[str, tuple[str, ...]]] = {
             r"后身腰省",
         ),
     },
+    "front_pockets": {
+        "none": (r"\bno[ -]front[ -]pockets?\b", r"前身無袋", r"前身无袋"),
+        "patch_pair": (
+            r"\bfront[ -]patch[ -]pockets?\b",
+            r"\bpair[ -]of[ -]front[ -]patch[ -]pockets?\b",
+            r"前貼袋",
+            r"前贴袋",
+            r"前身貼袋",
+            r"前身贴袋",
+        ),
+    },
+    "front_buttons": {
+        "none": (r"\bno[ -]front[ -]buttons?\b", r"前身無鈕", r"前身无纽", r"前身無扣", r"前身无扣"),
+        "centre_row": (
+            r"\bcentre[ -]front[ -]buttons?\b",
+            r"\bcenter[ -]front[ -]buttons?\b",
+            r"\bfront[ -]button[ -]row\b",
+            r"前中鈕扣",
+            r"前中纽扣",
+            r"前中扣",
+        ),
+    },
+    "front_princess_seams": {
+        "none": (r"\bno[ -]front[ -]princess[ -]seams?\b", r"前身無公主線", r"前身无公主线"),
+        "shoulder_pair": (
+            r"\bfront[ -]shoulder[ -]princess[ -]seams?\b",
+            r"\bshoulder[ -]princess[ -]seams?\b",
+            r"前肩公主線",
+            r"前肩公主线",
+            r"肩公主線",
+            r"肩公主线",
+        ),
+    },
 }
 
-# These phrases are deliberately rejected rather than silently simplified to a
-# supported v0.1 option.
 _UNSUPPORTED = (
     r"\blong[ -]?sleeve(?:d)?\b",
     r"\bpuff[ -]?sleeve(?:d)?\b",
@@ -149,9 +180,9 @@ def parse_prompt(text: str, *, require_back: bool = False) -> PromptParseResult:
     """Map a garment prompt to the v0.1 DressSpec without hidden defaults.
 
     Front semantic categories must always be explicit. Back neckline/closure
-    become mandatory only when a caller requests a back technical flat. Dart
-    categories are optional: omitted means unspecified, while explicit `none`
-    means the user has confirmed that the view contains no waist-dart pair.
+    become mandatory only when a caller requests a back technical flat.
+    Construction-detail categories are optional: omitted means unspecified,
+    while explicit `none` means the user has confirmed absence.
     """
     normalized = " ".join(text.strip().split())
     if not normalized:
@@ -170,16 +201,14 @@ def parse_prompt(text: str, *, require_back: bool = False) -> PromptParseResult:
     if resolved["garment"] != "dress":
         raise PromptParseError(f"unsupported garment: {resolved['garment']}")
 
-    back_neckline = _resolve_category(normalized, "back_neckline", required=require_back)
-    back_closure = _resolve_category(normalized, "back_closure", required=require_back)
-    front_darts = _resolve_category(normalized, "front_darts", required=False)
-    back_darts = _resolve_category(normalized, "back_darts", required=False)
-
     optional_values = {
-        "back_neckline": back_neckline,
-        "back_closure": back_closure,
-        "front_darts": front_darts,
-        "back_darts": back_darts,
+        "back_neckline": _resolve_category(normalized, "back_neckline", required=require_back),
+        "back_closure": _resolve_category(normalized, "back_closure", required=require_back),
+        "front_darts": _resolve_category(normalized, "front_darts", required=False),
+        "back_darts": _resolve_category(normalized, "back_darts", required=False),
+        "front_pockets": _resolve_category(normalized, "front_pockets", required=False),
+        "front_buttons": _resolve_category(normalized, "front_buttons", required=False),
+        "front_princess_seams": _resolve_category(normalized, "front_princess_seams", required=False),
     }
     for category, value in optional_values.items():
         if value is not None:
@@ -190,9 +219,12 @@ def parse_prompt(text: str, *, require_back: bool = False) -> PromptParseResult:
         sleeve=resolved["sleeve"],
         silhouette=resolved["silhouette"],
         length=resolved["length"],
-        back_neckline=back_neckline,
-        back_closure=back_closure,
-        front_darts=front_darts,
-        back_darts=back_darts,
+        back_neckline=optional_values["back_neckline"],
+        back_closure=optional_values["back_closure"],
+        front_darts=optional_values["front_darts"],
+        back_darts=optional_values["back_darts"],
+        front_pockets=optional_values["front_pockets"],
+        front_buttons=optional_values["front_buttons"],
+        front_princess_seams=optional_values["front_princess_seams"],
     )
     return PromptParseResult(garment="dress", spec=spec, matched=resolved)
