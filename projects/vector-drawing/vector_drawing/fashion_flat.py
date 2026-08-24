@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .flat_details import build_waist_dart_pair
+from .flat_details import (
+    build_centre_button_row,
+    build_patch_pocket_pair,
+    build_shoulder_princess_seam_pair,
+    build_waist_dart_pair,
+)
 from .model import Cubic, Drawing, Line, Move, Point, SemanticPath
 
 
@@ -24,6 +29,9 @@ class DressSpec:
     back_closure: str | None = None    # none | centre_zip
     front_darts: str | None = None     # none | waist_pair; None = unspecified
     back_darts: str | None = None      # none | waist_pair; None = unspecified
+    front_pockets: str | None = None   # none | patch_pair; None = unspecified
+    front_buttons: str | None = None   # none | centre_row; None = unspecified
+    front_princess_seams: str | None = None  # none | shoulder_pair; None = unspecified
 
     def __post_init__(self) -> None:
         allowed = {
@@ -37,6 +45,9 @@ class DressSpec:
             "back_closure": ({"none", "centre_zip"}, self.back_closure),
             "front_darts": ({"none", "waist_pair"}, self.front_darts),
             "back_darts": ({"none", "waist_pair"}, self.back_darts),
+            "front_pockets": ({"none", "patch_pair"}, self.front_pockets),
+            "front_buttons": ({"none", "centre_row"}, self.front_buttons),
+            "front_princess_seams": ({"none", "shoulder_pair"}, self.front_princess_seams),
         }
         for name, (options, value) in allowed.items():
             if value not in options:
@@ -160,6 +171,12 @@ def build_dress_flat(spec: DressSpec) -> Drawing:
 
     if spec.front_darts == "waist_pair":
         paths.extend(build_waist_dart_pair(view="front", waist_y=waist_y))
+    if spec.front_pockets == "patch_pair":
+        paths.extend(build_patch_pocket_pair())
+    if spec.front_buttons == "centre_row":
+        paths.extend(build_centre_button_row())
+    if spec.front_princess_seams == "shoulder_pair":
+        paths.extend(build_shoulder_princess_seam_pair())
 
     return Drawing(
         drawing_id=f"dress-{spec.neckline}-{spec.sleeve}-{spec.silhouette}-{spec.length}",
