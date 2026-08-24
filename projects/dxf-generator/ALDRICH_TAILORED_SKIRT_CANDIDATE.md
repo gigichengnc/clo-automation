@@ -4,7 +4,7 @@
 
 `RESEARCH_CANDIDATE` / `NOT_PRODUCTION_DEFAULT`
 
-This experiment encodes the Winifred Aldrich tailored-skirt block as a named external drafting-system candidate. It does not change the production gate and it does not generate pattern geometry or DXF.
+This experiment encodes the Winifred Aldrich tailored-skirt block as a named external drafting-system candidate. It does not select a production policy and it does not generate pattern geometry or DXF.
 
 Primary source checked: University of Manchester reproduction of the Aldrich tailored-skirt block.
 
@@ -14,7 +14,7 @@ Source-native facts used:
 - total hip ease: 30 mm;
 - the side seam is moved forward;
 - back hip span: quarter body hip + 15 mm;
-- front hip span: the remaining quarter body hip span;
+- front hip span: the remaining half-garment hip span;
 - standard variant: one 20 mm front dart and two 20 mm back darts;
 - small-waist variant: 25 mm per dart, with no numeric source threshold for automatic selection.
 
@@ -38,7 +38,7 @@ Aldrich's stated ease gives:
 ```text
 finished waist = 710 mm
 finished hip   = 930 mm
-canonical average quarter suppression
+canonical quarter suppression
 = 930/4 - 710/4
 = 55 mm
 ```
@@ -63,53 +63,62 @@ total suppression    = 62.5 mm
 finished waist span  = 177.5 mm
 ```
 
-The panel average is:
+The half-garment total is:
 
 ```text
-(47.5 + 62.5) / 2 = 55 mm
+47.5 + 62.5 = 110 mm
+2 × canonical quarter suppression = 2 × 55 = 110 mm
 ```
 
-So whole-garment suppression conservation is consistent with the canonical finished-waist/finished-hip arithmetic.
+So whole half-garment suppression conservation is consistent with the canonical finished-waist/finished-hip arithmetic even though the front/back panel targets are asymmetric.
 
-## Contract mismatch discovered
+## Architecture finding resolved
 
-The current repo `SchoolSkirtSuppressionAllocation` validator expects **each** front and back panel to satisfy:
+The previous repo suppression validator required **each** front and back panel to equal the same `quarter_suppression`. That historical equal-quarter assumption could not represent a drafting system that deliberately shifts the side seam and allocates different front/back hip spans.
 
-```text
-dart_intake_total + side_shaping = quarter_suppression
-```
-
-For the example above it therefore expects both panels to equal `55 mm`.
-
-The Aldrich tailored block instead gives:
+The core contract has now been generalized into two explicit decisions:
 
 ```text
-front = 47.5 mm
-back  = 62.5 mm
-mean  = 55.0 mm
-```
-
-This is not a failure of suppression conservation. It is a modelling mismatch caused by the Aldrich system deliberately moving the side seam forward and allocating different hip spans to front and back.
-
-Therefore the current equal-quarter front/back suppression contract is too narrow to represent this named drafting system without distortion.
-
-## Safe conclusion
-
-Do not modify the production gate or promote Aldrich values as defaults.
-
-Before any production policy is selected, the project should first decide whether its suppression contract needs to support explicit panel allocation, for example:
-
-```text
-total finished hip
+global suppression requirement
         ↓
-front/back panel hip allocation
-        ↓
-front suppression target
-back suppression target
+PanelSuppressionTargets(front, back)
         ↓
 per-panel dart + side-shaping allocation
 ```
 
-rather than assuming identical quarter suppression on both panels.
+Validation now requires:
 
-This finding should be treated as an architecture question, not as evidence that Aldrich is the correct production block for the target school skirt.
+```text
+front_target + back_target
+= 2 × quarter_suppression
+```
+
+and then independently:
+
+```text
+front dart + front side shaping = front_target
+back darts + back side shaping  = back_target
+```
+
+Under this generalized contract the source-native Aldrich example is mathematically compatible:
+
+```text
+front target = 47.5 mm
+back target  = 62.5 mm
+allocation validation = PASS
+```
+
+The research candidate still records `legacy_equal_quarter_mismatch = True` so the historical modelling limitation remains visible rather than being erased.
+
+## What this does NOT prove
+
+Passing the generalized contract does not promote Aldrich into a production rule. It proves only that the contract can faithfully represent an asymmetric named drafting system without distorting it.
+
+The production gate therefore still safe-stops on two separate decisions:
+
+```text
+panel_suppression_target_policy = NEEDS_RULE
+suppression_allocation_policy   = NEEDS_RULE
+```
+
+A production-approved school-skirt policy still requires same-family evidence or explicit human approval, plus fit/toile validation.
