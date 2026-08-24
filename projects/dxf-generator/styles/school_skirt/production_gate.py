@@ -142,9 +142,10 @@ def build_school_skirt_production_gate(
     Production callers therefore cannot accidentally inherit prototype defaults
     merely by omitting them.
 
-    The function stops at readiness assessment. It never chooses suppression,
-    dart distribution, dart placement, side-seam shape, hem shape, waistband,
-    closure, seam allowance, notches, grain, or DXF serialization.
+    The function stops at readiness assessment. It never chooses front/back
+    suppression targets, dart-versus-side allocation, dart distribution, dart
+    placement, side-seam shape, hem shape, waistband, closure, seam allowance,
+    notches, grain, or DXF serialization.
     """
 
     assessments: list[ProductionGateAssessment] = []
@@ -259,10 +260,18 @@ def build_school_skirt_production_gate(
                 "human_or_reference_approved_waist_finish_dimensions",
             ),
             _needs_rule(
-                "suppression_policy",
+                "panel_suppression_target_policy",
                 None,
-                "the repo defines the suppression-allocation contract but deliberately has no production policy implementation",
-                "validated_front_back_suppression_allocation",
+                "the global suppression requirement is known, but the production rule assigning explicit front/back panel targets is unresolved",
+                "validated_front_back_panel_targets",
+                "front_back_balance_provenance",
+                "production_evidence_or_human_approval",
+            ),
+            _needs_rule(
+                "suppression_allocation_policy",
+                None,
+                "each explicit panel target still requires an approved rule dividing it between dart intake and side shaping",
+                "validated_panel_dart_vs_side_allocation",
                 "production_evidence_or_human_approval",
             ),
             _needs_rule(
