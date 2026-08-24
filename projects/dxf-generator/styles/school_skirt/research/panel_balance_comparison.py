@@ -14,6 +14,9 @@ from dataclasses import dataclass
 
 from measurements.body import BodyMeasurements
 from styles.school_skirt.draft import SchoolSkirtDraft
+from styles.school_skirt.research.aldrich_tailored_candidate import (
+    AldrichTailoredSkirtCandidate,
+)
 from styles.school_skirt.research.panel_balance_candidate import (
     PanelBalanceCandidateEvaluation,
     PanelBalanceEvidence,
@@ -95,6 +98,25 @@ def build_symmetric_panel_balance_baseline(
         provenance="ARCHITECTURAL_BASELINE: symmetric 50/50 finished spans",
         status="RESEARCH_BASELINE",
         production_status="NOT_APPROVED",
+    )
+
+
+def panel_balance_evidence_from_aldrich(
+    candidate: AldrichTailoredSkirtCandidate,
+) -> PanelBalanceEvidence:
+    """Adapt an already-built Aldrich candidate without re-deriving its spans."""
+
+    return PanelBalanceEvidence(
+        front_hip_span=candidate.front.hip_span,
+        back_hip_span=candidate.back.hip_span,
+        front_finished_waist_span=candidate.front.finished_waist_span,
+        back_finished_waist_span=candidate.back.finished_waist_span,
+        provenance=(
+            f"{candidate.source_system}; variant={candidate.variant.value}; "
+            "source-native panel spans"
+        ),
+        status=candidate.status,
+        production_status=candidate.production_status,
     )
 
 
