@@ -35,6 +35,9 @@ def _load_spec(spec_path: Path | None, prompt: str | None, *, view: str) -> Dres
         back_closure=raw.get("back_closure"),
         front_darts=raw.get("front_darts"),
         back_darts=raw.get("back_darts"),
+        front_pockets=raw.get("front_pockets"),
+        front_buttons=raw.get("front_buttons"),
+        front_princess_seams=raw.get("front_princess_seams"),
     )
 
 
