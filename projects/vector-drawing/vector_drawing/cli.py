@@ -33,6 +33,8 @@ def _load_spec(spec_path: Path | None, prompt: str | None, *, view: str) -> Dres
         length=raw.get("length", "midi"),
         back_neckline=raw.get("back_neckline"),
         back_closure=raw.get("back_closure"),
+        front_darts=raw.get("front_darts"),
+        back_darts=raw.get("back_darts"),
     )
 
 
