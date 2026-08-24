@@ -19,6 +19,8 @@ class DressSpec:
     sleeve: str = "sleeveless"    # sleeveless | short
     silhouette: str = "a_line"    # a_line | straight
     length: str = "midi"          # mini | knee | midi | maxi
+    back_neckline: str | None = None   # same_as_front | shallow_round
+    back_closure: str | None = None    # none | centre_zip
 
     def __post_init__(self) -> None:
         allowed = {
@@ -27,8 +29,15 @@ class DressSpec:
             "silhouette": ({"a_line", "straight"}, self.silhouette),
             "length": (set(_LENGTH_Y), self.length),
         }
+        optional_allowed = {
+            "back_neckline": ({"same_as_front", "shallow_round"}, self.back_neckline),
+            "back_closure": ({"none", "centre_zip"}, self.back_closure),
+        }
         for name, (options, value) in allowed.items():
             if value not in options:
+                raise ValueError(f"unsupported {name}: {value}")
+        for name, (options, value) in optional_allowed.items():
+            if value is not None and value not in options:
                 raise ValueError(f"unsupported {name}: {value}")
 
 
