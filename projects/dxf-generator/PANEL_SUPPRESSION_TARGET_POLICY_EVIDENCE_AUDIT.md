@@ -39,6 +39,35 @@ back darts  + back side shaping  = back_target
 
 There is deliberately no implicit `front == back` rule.
 
+## Research candidate interface
+
+Research systems are compared through:
+
+```text
+styles/school_skirt/research/panel_balance_candidate.py
+```
+
+A candidate must explicitly provide:
+
+```text
+front_hip_span
+back_hip_span
+front_finished_waist_span
+back_finished_waist_span
+provenance
+```
+
+The engine derives:
+
+```text
+front_target = front_hip_span - front_finished_waist_span
+back_target  = back_hip_span  - back_finished_waist_span
+```
+
+and checks only whole-garment conservation. A passing research evaluation does **not** establish fit quality or production authority.
+
+The interface contains no default 50/50, 49/51, Aldrich, or other ratio.
+
 ## Why panel targets are a separate drafting decision
 
 A front/back target is not determined by waist and hip circumference alone. It also depends on how a drafting system allocates the half-garment hip and waist spans between the front and back pattern families.
@@ -165,6 +194,7 @@ The generalized contract is now broad enough, but the policy remains unresolved:
 | --- | --- | --- |
 | whole half-garment suppression conservation | `SUPPORTED` | mathematical invariant + generalized validator |
 | asymmetric front/back targets | `SUPPORTED` | data model + validator |
+| research candidate comparison | `SUPPORTED` | explicit panel-span contract, no production defaults |
 | symmetric 50/50 target split | `RESEARCH_BASELINE` | architectural baseline only |
 | Aldrich asymmetric split | `RESEARCH_CANDIDATE` | named external system |
 | 49/51 hip balance | `RESEARCH_CANDIDATE` | published drafting method |
