@@ -71,6 +71,40 @@ _ALIASES: dict[str, dict[str, tuple[str, ...]]] = {
             r"后中拉链",
         ),
     },
+    "front_darts": {
+        "none": (
+            r"\bno[ -]front[ -]darts?\b",
+            r"\bfront[ -]darts?[ -]none\b",
+            r"前身無省",
+            r"前身无省",
+            r"前無省",
+            r"前无省",
+        ),
+        "waist_pair": (
+            r"\bfront[ -]waist[ -]darts?\b",
+            r"\bfront[ -]dart[ -]pair\b",
+            r"前腰省",
+            r"前身腰省",
+        ),
+    },
+    "back_darts": {
+        "none": (
+            r"\bno[ -]back[ -]darts?\b",
+            r"\bback[ -]darts?[ -]none\b",
+            r"後身無省",
+            r"后身无省",
+            r"後無省",
+            r"后无省",
+        ),
+        "waist_pair": (
+            r"\bback[ -]waist[ -]darts?\b",
+            r"\bback[ -]dart[ -]pair\b",
+            r"後腰省",
+            r"后腰省",
+            r"後身腰省",
+            r"后身腰省",
+        ),
+    },
 }
 
 # These phrases are deliberately rejected rather than silently simplified to a
@@ -114,10 +148,10 @@ def _resolve_category(text: str, category: str, *, required: bool) -> str | None
 def parse_prompt(text: str, *, require_back: bool = False) -> PromptParseResult:
     """Map a garment prompt to the v0.1 DressSpec without hidden defaults.
 
-    Front semantic categories must always be explicit. Back categories become
-    mandatory only when a caller requests a back technical flat. Back language
-    is still parsed when present for front requests so contradictions are not
-    silently ignored.
+    Front semantic categories must always be explicit. Back neckline/closure
+    become mandatory only when a caller requests a back technical flat. Dart
+    categories are optional: omitted means unspecified, while explicit `none`
+    means the user has confirmed that the view contains no waist-dart pair.
     """
     normalized = " ".join(text.strip().split())
     if not normalized:
@@ -138,10 +172,18 @@ def parse_prompt(text: str, *, require_back: bool = False) -> PromptParseResult:
 
     back_neckline = _resolve_category(normalized, "back_neckline", required=require_back)
     back_closure = _resolve_category(normalized, "back_closure", required=require_back)
-    if back_neckline is not None:
-        resolved["back_neckline"] = back_neckline
-    if back_closure is not None:
-        resolved["back_closure"] = back_closure
+    front_darts = _resolve_category(normalized, "front_darts", required=False)
+    back_darts = _resolve_category(normalized, "back_darts", required=False)
+
+    optional_values = {
+        "back_neckline": back_neckline,
+        "back_closure": back_closure,
+        "front_darts": front_darts,
+        "back_darts": back_darts,
+    }
+    for category, value in optional_values.items():
+        if value is not None:
+            resolved[category] = value
 
     spec = DressSpec(
         neckline=resolved["neckline"],
@@ -150,5 +192,7 @@ def parse_prompt(text: str, *, require_back: bool = False) -> PromptParseResult:
         length=resolved["length"],
         back_neckline=back_neckline,
         back_closure=back_closure,
+        front_darts=front_darts,
+        back_darts=back_darts,
     )
     return PromptParseResult(garment="dress", spec=spec, matched=resolved)
