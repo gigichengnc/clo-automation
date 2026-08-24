@@ -12,13 +12,13 @@ from .validation import validate_drawing
 from .views import build_dress_view
 
 
-def _load_spec(spec_path: Path | None, prompt: str | None) -> DressSpec:
+def _load_spec(spec_path: Path | None, prompt: str | None, *, view: str) -> DressSpec:
     if (spec_path is None) == (prompt is None):
         raise SystemExit("provide exactly one of a JSON spec path or --prompt")
 
     if prompt is not None:
         try:
-            return parse_prompt(prompt).spec
+            return parse_prompt(prompt, require_back=view == "back").spec
         except PromptParseError as exc:
             raise SystemExit(f"prompt rejected: {exc}") from exc
 
@@ -31,6 +31,8 @@ def _load_spec(spec_path: Path | None, prompt: str | None) -> DressSpec:
         sleeve=raw.get("sleeve", "sleeveless"),
         silhouette=raw.get("silhouette", "a_line"),
         length=raw.get("length", "midi"),
+        back_neckline=raw.get("back_neckline"),
+        back_closure=raw.get("back_closure"),
     )
 
 
@@ -48,7 +50,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    spec = _load_spec(args.spec, args.prompt)
+    spec = _load_spec(args.spec, args.prompt, view=args.view)
     drawing = build_dress_view(spec, view=args.view)
 
     if args.validate:
