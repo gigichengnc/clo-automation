@@ -55,21 +55,20 @@ class AldrichTailoredSkirtCandidateTests(unittest.TestCase):
 
         self.assertEqual(candidate.canonical_quarter_suppression, 55.0)
         self.assertEqual(candidate.mean_source_panel_suppression, 55.0)
+        self.assertEqual(candidate.panel_targets.front, 47.5)
+        self.assertEqual(candidate.panel_targets.back, 62.5)
+        self.assertEqual(candidate.panel_targets.total, 110.0)
 
-    def test_current_equal_quarter_contract_reports_mapping_mismatch(self):
+    def test_generalized_panel_target_contract_accepts_source_native_mapping(self):
         candidate = build_aldrich_tailored_skirt_candidate(
             self._body(),
             variant=AldrichVariant.STANDARD,
         )
 
-        self.assertFalse(candidate.compatible_with_current_equal_quarter_contract)
-        self.assertEqual(
-            candidate.current_contract_validation_errors,
-            (
-                "front suppression allocation must equal quarter_suppression (55.0 mm)",
-                "back suppression allocation must equal quarter_suppression (55.0 mm)",
-            ),
-        )
+        self.assertTrue(candidate.compatible_with_general_panel_target_contract)
+        self.assertEqual(candidate.panel_target_validation_errors, ())
+        self.assertEqual(candidate.allocation_validation_errors, ())
+        self.assertTrue(candidate.legacy_equal_quarter_mismatch)
 
     def test_small_waist_variant_is_explicit_not_auto_selected(self):
         candidate = build_aldrich_tailored_skirt_candidate(
@@ -82,6 +81,7 @@ class AldrichTailoredSkirtCandidateTests(unittest.TestCase):
         self.assertEqual(candidate.front.finished_waist_span, 177.5)
         self.assertEqual(candidate.back.finished_waist_span, 177.5)
         self.assertEqual(candidate.mean_source_panel_suppression, 55.0)
+        self.assertTrue(candidate.compatible_with_general_panel_target_contract)
 
     def test_candidate_does_not_generate_geometry_or_dxf(self):
         candidate = build_aldrich_tailored_skirt_candidate(
