@@ -6,6 +6,12 @@ from .model import Cubic, Drawing, Line, Move, Point, SemanticPath
 
 
 _SUPPORTED_VIEWS = {"front", "back"}
+_FRONT_ONLY_ROLE_PREFIXES = (
+    "dart.front.",
+    "pocket.front.",
+    "button.front.",
+    "princess.front.",
+)
 
 
 def _replace_back_neckline(path: SemanticPath, *, spec: DressSpec) -> SemanticPath:
@@ -49,14 +55,19 @@ def _back_centre_guide(path: SemanticPath, *, has_zip: bool) -> SemanticPath:
     )
 
 
+def _is_front_only_detail(path: SemanticPath) -> bool:
+    return path.role.startswith(_FRONT_ONLY_ROLE_PREFIXES)
+
+
 def build_dress_view(spec: DressSpec, *, view: str) -> Drawing:
     """Build one deterministic technical-flat view from the shared DressSpec.
 
     Front geometry uses front construction semantics. A back view requires
-    explicit back-neckline and back-closure values, removes front-only dart
-    paths, and renders only explicitly requested back construction details.
-    Missing optional dart semantics remain unspecified rather than being
-    silently converted to confirmed `none`.
+    explicit back-neckline and back-closure values, removes every front-only
+    construction path, and renders only explicitly requested back details.
+
+    Technical-flat construction geometry is illustrative and is not production
+    sewing or pattern geometry.
     """
     if view not in _SUPPORTED_VIEWS:
         raise ValueError(f"unsupported view: {view}")
@@ -78,7 +89,7 @@ def build_dress_view(spec: DressSpec, *, view: str) -> Drawing:
     back_neckline: SemanticPath | None = None
 
     for path in base.paths:
-        if path.role.startswith("dart.front."):
+        if _is_front_only_detail(path):
             continue
         if path.role == "neckline":
             back_neckline = _replace_back_neckline(path, spec=spec)
