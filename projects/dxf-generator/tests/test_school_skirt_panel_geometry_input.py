@@ -15,7 +15,10 @@ from styles.school_skirt.dart_plan import (
 )
 from styles.school_skirt.draft import SchoolSkirtDraft
 from styles.school_skirt.panel_geometry_input import (
+    PanelFinishedSpans,
+    SchoolSkirtPanelFinishedSpans,
     build_school_skirt_panel_geometry_input,
+    build_school_skirt_panel_geometry_input_from_spans,
 )
 from styles.school_skirt.suppression import (
     PanelSuppressionAllocation,
@@ -109,6 +112,64 @@ class SchoolSkirtPanelGeometryInputTests(unittest.TestCase):
         self.assertEqual(geometry_input.front.target_waist_span, 180.0)
         self.assertEqual(geometry_input.front.waist_span_before_darts, 180.0)
         self.assertEqual(geometry_input.front.darts, ())
+
+    def test_explicit_spans_preserve_asymmetric_panel_balance(self):
+        draft = SchoolSkirtDraft(
+            quarter_waist=177.5,
+            quarter_hip=232.5,
+            quarter_suppression=55.0,
+            hip_position=200.0,
+            hem_position=500.0,
+            hem_half_width=232.5,
+        )
+        spans = SchoolSkirtPanelFinishedSpans(
+            front=PanelFinishedSpans(
+                target_waist_span=177.5,
+                hip_span=225.0,
+                hem_span=225.0,
+            ),
+            back=PanelFinishedSpans(
+                target_waist_span=177.5,
+                hip_span=240.0,
+                hem_span=240.0,
+            ),
+        )
+        allocation = SchoolSkirtSuppressionAllocation(
+            front=PanelSuppressionAllocation(
+                dart_intake_total=20.0,
+                side_shaping=27.5,
+            ),
+            back=PanelSuppressionAllocation(
+                dart_intake_total=40.0,
+                side_shaping=22.5,
+            ),
+        )
+        dart_plan = SchoolSkirtDartPlan(
+            front=PanelDartPlan(
+                darts=(ResolvedDart(0, 20.0, 1.0 / 3.0, 100.0),),
+            ),
+            back=PanelDartPlan(
+                darts=(
+                    ResolvedDart(0, 20.0, 1.0 / 3.0, 140.0),
+                    ResolvedDart(1, 20.0, 2.0 / 3.0, 125.0),
+                ),
+            ),
+        )
+
+        geometry_input = build_school_skirt_panel_geometry_input_from_spans(
+            draft,
+            spans,
+            allocation,
+            dart_plan,
+        )
+
+        self.assertEqual(geometry_input.front.hip_span, 225.0)
+        self.assertEqual(geometry_input.back.hip_span, 240.0)
+        self.assertEqual(geometry_input.front.waist_span_before_darts, 197.5)
+        self.assertEqual(geometry_input.back.waist_span_before_darts, 217.5)
+        self.assertEqual(geometry_input.front.darts[0].length, 100.0)
+        self.assertEqual(geometry_input.back.darts[0].length, 140.0)
+        self.assertEqual(geometry_input.back.darts[1].length, 125.0)
 
 
 if __name__ == "__main__":
