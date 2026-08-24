@@ -134,6 +134,30 @@ The v0.1 DXF exporter writes **standard DXF R12 artwork geometry**. It is **not*
 
 SVG remains the authoritative illustration output.
 
+## Production request bridge
+
+The semantic front-end now has a strict downstream bridge at:
+
+```text
+projects/dxf-generator/garment_request_bridge.py
+```
+
+It translates `DressSpec` values into a `ProductionPatternRequest` assessment without copying any illustration coordinates:
+
+```text
+DressSpec
+   ↓
+semantic values only
+   ↓
+ProductionPatternRequest
+   ↓
+SUPPORTED / NEEDS_RULE / UNSUPPORTED
+```
+
+For example, `front_darts = waist_pair` does **not** reuse the technical-flat dart lines. It becomes a production requirement for a validated suppression policy, dart intake, length and placement. `short` sleeve similarly becomes a requirement for validated armhole and sleeve-cap rules.
+
+The current general dress request is intentionally not production-ready because body measurements, numeric garment targets, material/layer policy and several drafting systems remain unresolved.
+
 ## Run
 
 ```bash
@@ -159,9 +183,9 @@ python -m unittest discover -s tests -v
 4. **DONE v0.1:** explicit back neckline and closure semantics;
 5. **DONE v0.1:** explicit front/back waist-dart semantics;
 6. **DONE v0.1:** small front construction vocabulary: patch pockets, centre button row and shoulder princess seams;
-7. **NEXT:** create a strict bridge from illustration `DressSpec` into a production-pattern request without copying illustration coordinates;
-8. map only semantics that have validated production drafting rules;
+7. **DONE bridge v0.1:** strict semantic `DressSpec` -> `ProductionPatternRequest` assessment with no illustration-coordinate transfer;
+8. **NEXT:** supply validated production inputs/rules to one narrow garment family and make the first request pass selected drafting gates;
 9. keep unsupported production semantics as safe-stops;
 10. later add semantic raster/image understanding as an input adapter rather than a geometry generator.
 
-The next phase therefore returns to the main garment-building goal: one semantic garment definition should be able to drive both a clean technical flat and, where production rules are independently validated, a manufacturable pattern request.
+The next phase is therefore back in the main garment-building engine: choose one narrow production family, provide real measurements and independently validated drafting rules, then generate pattern geometry only for the semantics that pass those gates.
