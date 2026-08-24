@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .fashion_flat import DressSpec, build_dress_flat
+from .flat_details import build_waist_dart_pair
 from .model import Cubic, Drawing, Line, Move, Point, SemanticPath
 
 
@@ -51,9 +52,11 @@ def _back_centre_guide(path: SemanticPath, *, has_zip: bool) -> SemanticPath:
 def build_dress_view(spec: DressSpec, *, view: str) -> Drawing:
     """Build one deterministic technical-flat view from the shared DressSpec.
 
-    Front geometry uses the existing front semantics. A back view requires
-    explicit back-neckline and back-closure values. Missing back semantics
-    safe-stop instead of being inferred.
+    Front geometry uses front construction semantics. A back view requires
+    explicit back-neckline and back-closure values, removes front-only dart
+    paths, and renders only explicitly requested back construction details.
+    Missing optional dart semantics remain unspecified rather than being
+    silently converted to confirmed `none`.
     """
     if view not in _SUPPORTED_VIEWS:
         raise ValueError(f"unsupported view: {view}")
@@ -75,6 +78,8 @@ def build_dress_view(spec: DressSpec, *, view: str) -> Drawing:
     back_neckline: SemanticPath | None = None
 
     for path in base.paths:
+        if path.role.startswith("dart.front."):
+            continue
         if path.role == "neckline":
             back_neckline = _replace_back_neckline(path, spec=spec)
             paths.append(back_neckline)
@@ -98,6 +103,9 @@ def build_dress_view(spec: DressSpec, *, view: str) -> Drawing:
         )
     elif spec.back_closure != "none":
         raise ValueError(f"unsupported back_closure: {spec.back_closure}")
+
+    if spec.back_darts == "waist_pair":
+        paths.extend(build_waist_dart_pair(view="back"))
 
     return Drawing(
         drawing_id=f"{base.drawing_id}-back",
