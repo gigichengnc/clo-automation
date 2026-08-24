@@ -28,16 +28,19 @@ class VectorDrawingTests(unittest.TestCase):
         self.assertTrue(dxf.rstrip().endswith("EOF"))
 
     def test_invalid_spec_safe_stops(self):
-        with self.assertRaises(ValueError):
-            DressSpec(neckline="invented")
-        with self.assertRaises(ValueError):
-            DressSpec(back_neckline="invented")
-        with self.assertRaises(ValueError):
-            DressSpec(back_closure="invented")
-        with self.assertRaises(ValueError):
-            DressSpec(front_darts="invented")
-        with self.assertRaises(ValueError):
-            DressSpec(back_darts="invented")
+        for kwargs in (
+            {"neckline": "invented"},
+            {"back_neckline": "invented"},
+            {"back_closure": "invented"},
+            {"front_darts": "invented"},
+            {"back_darts": "invented"},
+            {"front_pockets": "invented"},
+            {"front_buttons": "invented"},
+            {"front_princess_seams": "invented"},
+        ):
+            with self.subTest(kwargs=kwargs):
+                with self.assertRaises(ValueError):
+                    DressSpec(**kwargs)
 
     def test_prompt_maps_to_controlled_spec(self):
         result = parse_prompt("round-neck short-sleeve midi A-line dress")
@@ -77,6 +80,30 @@ class VectorDrawingTests(unittest.TestCase):
         self.assertEqual(result.spec.front_darts, "waist_pair")
         self.assertEqual(result.spec.back_darts, "waist_pair")
 
+    def test_prompt_maps_small_front_construction_vocabulary(self):
+        result = parse_prompt(
+            "round-neck short-sleeve midi A-line dress front patch pockets centre-front buttons front shoulder princess seams"
+        )
+        self.assertEqual(result.spec.front_pockets, "patch_pair")
+        self.assertEqual(result.spec.front_buttons, "centre_row")
+        self.assertEqual(result.spec.front_princess_seams, "shoulder_pair")
+
+    def test_chinese_prompt_maps_small_front_construction_vocabulary(self):
+        result = parse_prompt("圓領 短袖 中長 A字 連衣裙 前貼袋 前中鈕扣 前肩公主線")
+        self.assertEqual(result.spec.front_pockets, "patch_pair")
+        self.assertEqual(result.spec.front_buttons, "centre_row")
+        self.assertEqual(result.spec.front_princess_seams, "shoulder_pair")
+
+    def test_prompt_preserves_unspecified_vs_explicit_no_construction_detail(self):
+        unspecified = parse_prompt("round-neck short-sleeve midi A-line dress")
+        explicit_none = parse_prompt("round-neck short-sleeve midi A-line dress no front pockets no front buttons no front princess seams")
+        self.assertIsNone(unspecified.spec.front_pockets)
+        self.assertIsNone(unspecified.spec.front_buttons)
+        self.assertIsNone(unspecified.spec.front_princess_seams)
+        self.assertEqual(explicit_none.spec.front_pockets, "none")
+        self.assertEqual(explicit_none.spec.front_buttons, "none")
+        self.assertEqual(explicit_none.spec.front_princess_seams, "none")
+
     def test_prompt_preserves_unspecified_vs_explicit_no_darts(self):
         unspecified = parse_prompt("round-neck short-sleeve midi A-line dress")
         explicit_none = parse_prompt("round-neck short-sleeve midi A-line dress no front darts")
@@ -86,6 +113,10 @@ class VectorDrawingTests(unittest.TestCase):
     def test_prompt_rejects_conflicting_dart_semantics(self):
         with self.assertRaises(PromptParseError):
             parse_prompt("round-neck short-sleeve midi A-line dress front waist darts no front darts")
+
+    def test_prompt_rejects_conflicting_construction_semantics(self):
+        with self.assertRaises(PromptParseError):
+            parse_prompt("round-neck short-sleeve midi A-line dress front patch pockets no front pockets")
 
     def test_back_prompt_requires_explicit_back_categories(self):
         with self.assertRaises(PromptParseError):
