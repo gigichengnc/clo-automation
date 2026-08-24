@@ -9,30 +9,34 @@ Aldrich tailored-skirt block. Key source-native rules used here:
 
 - total waist ease: 10 mm;
 - total hip ease: 30 mm;
-- back hip span: quarter hip + 15 mm (side seam moved forward);
-- front hip span: the remaining quarter-hip span;
+- back hip span: quarter body hip + 15 mm (side seam moved forward);
+- front hip span: the remaining half-garment hip span;
 - standard darts: two 20 mm back darts, one 20 mm front dart;
 - small-waist variant: 25 mm per dart, but the source gives no numeric trigger
   for automatically choosing that variant.
 
-The current repo suppression contract assumes equal quarter suppression for
-front and back panels. Aldrich's tailored block deliberately makes front/back
-hip spans asymmetric, so this module reports that mapping mismatch instead of
-silently forcing the external system into the existing contract.
+The generalized repo suppression contract permits asymmetric front/back panel
+targets as long as the half-garment total is conserved. This module verifies
+that the source-native Aldrich allocation fits that generalized contract while
+retaining an explicit flag showing that it would not fit the historical equal-
+quarter-per-panel assumption.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
+import math
 
 from measurements.body import BodyMeasurements
 from styles.school_skirt.draft import SchoolSkirtDraft
 from styles.school_skirt.suppression import (
     PanelSuppressionAllocation,
+    PanelSuppressionTargets,
     SchoolSkirtSuppressionAllocation,
 )
 from styles.school_skirt.suppression_validation import (
+    validate_school_skirt_panel_suppression_targets,
     validate_school_skirt_suppression_allocation,
 )
 
@@ -62,22 +66,25 @@ class AldrichPanelCandidate:
 
 @dataclass(frozen=True)
 class AldrichTailoredSkirtCandidate:
-    """Inspectable source-native candidate plus current-contract comparison."""
+    """Inspectable source-native candidate plus repo-contract comparison."""
 
     variant: AldrichVariant
     front: AldrichPanelCandidate
     back: AldrichPanelCandidate
     canonical_quarter_suppression: float
     mean_source_panel_suppression: float
+    panel_targets: PanelSuppressionTargets
     mapped_allocation: SchoolSkirtSuppressionAllocation
-    current_contract_validation_errors: tuple[str, ...]
+    panel_target_validation_errors: tuple[str, ...]
+    allocation_validation_errors: tuple[str, ...]
+    legacy_equal_quarter_mismatch: bool
     status: str = "RESEARCH_CANDIDATE"
     production_status: str = "NOT_PRODUCTION_DEFAULT"
     source_system: str = "Winifred Aldrich tailored-skirt block"
 
     @property
-    def compatible_with_current_equal_quarter_contract(self) -> bool:
-        return not self.current_contract_validation_errors
+    def compatible_with_general_panel_target_contract(self) -> bool:
+        return not self.panel_target_validation_errors and not self.allocation_validation_errors
 
 
 def _panel(
@@ -127,8 +134,9 @@ def build_aldrich_tailored_skirt_candidate(
     else:  # defensive even though Enum typing should prevent this
         raise ValueError(f"unsupported Aldrich variant: {variant!r}")
 
-    # Aldrich moves the side seam forward: the back receives +15 mm at the hip,
-    # while the front receives the remaining quarter-hip span.
+    # Aldrich moves the side seam forward. Across one front + one back panel
+    # family, the extra 15 mm also accounts for the 30 mm total hip ease over
+    # the half garment.
     back_hip_span = quarter_hip + ALDRICH_BACK_HIP_EXTRA_MM
     front_hip_span = quarter_hip
 
@@ -151,6 +159,10 @@ def build_aldrich_tailored_skirt_candidate(
         front.total_suppression + back.total_suppression
     ) / 2.0
 
+    targets = PanelSuppressionTargets(
+        front=front.total_suppression,
+        back=back.total_suppression,
+    )
     mapped = SchoolSkirtSuppressionAllocation(
         front=PanelSuppressionAllocation(
             dart_intake_total=front.dart_intake_total,
@@ -162,9 +174,8 @@ def build_aldrich_tailored_skirt_candidate(
         ),
     )
 
-    # Use the existing validator only as a compatibility probe. The dummy
-    # vertical values are positive placeholders because suppression validation
-    # reads only quarter_suppression and allocation components.
+    # Dummy vertical values are positive placeholders because the suppression
+    # target validator reads only quarter_suppression.
     comparison_draft = SchoolSkirtDraft(
         quarter_waist=(body.waist + ALDRICH_WAIST_EASE_MM) / 4.0,
         quarter_hip=(body.hip + ALDRICH_HIP_EASE_MM) / 4.0,
@@ -173,8 +184,16 @@ def build_aldrich_tailored_skirt_candidate(
         hem_position=2.0,
         hem_half_width=1.0,
     )
-    validation_errors = tuple(
-        validate_school_skirt_suppression_allocation(comparison_draft, mapped)
+    target_errors = tuple(
+        validate_school_skirt_panel_suppression_targets(comparison_draft, targets)
+    )
+    allocation_errors = tuple(
+        validate_school_skirt_suppression_allocation(targets, mapped)
+    )
+
+    legacy_equal_quarter_mismatch = not (
+        math.isclose(front.total_suppression, canonical_quarter_suppression, abs_tol=1e-6)
+        and math.isclose(back.total_suppression, canonical_quarter_suppression, abs_tol=1e-6)
     )
 
     return AldrichTailoredSkirtCandidate(
@@ -183,6 +202,9 @@ def build_aldrich_tailored_skirt_candidate(
         back=back,
         canonical_quarter_suppression=canonical_quarter_suppression,
         mean_source_panel_suppression=mean_source_panel_suppression,
+        panel_targets=targets,
         mapped_allocation=mapped,
-        current_contract_validation_errors=validation_errors,
+        panel_target_validation_errors=target_errors,
+        allocation_validation_errors=allocation_errors,
+        legacy_equal_quarter_mismatch=legacy_equal_quarter_mismatch,
     )
