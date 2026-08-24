@@ -90,6 +90,40 @@ class FlatViewTests(unittest.TestCase):
         self.assertTrue(validate_drawing(front).passed)
         self.assertTrue(validate_drawing(back).passed)
 
+    def test_front_construction_details_are_semantic_and_valid(self):
+        spec = DressSpec(
+            front_pockets="patch_pair",
+            front_buttons="centre_row",
+            front_princess_seams="shoulder_pair",
+        )
+        front = build_dress_front_flat(spec)
+        self.assertEqual(len(front.paths_by_role("pocket.front.left")), 1)
+        self.assertEqual(len(front.paths_by_role("pocket.front.right")), 1)
+        self.assertEqual(len(front.paths_by_role("button.front.1")), 1)
+        self.assertEqual(len(front.paths_by_role("princess.front.left")), 1)
+        self.assertEqual(len(front.paths_by_role("princess.front.right")), 1)
+        self.assertTrue(validate_drawing(front).passed)
+
+    def test_back_strips_all_front_only_construction_details(self):
+        spec = DressSpec(
+            back_neckline="shallow_round",
+            back_closure="none",
+            front_darts="waist_pair",
+            front_pockets="patch_pair",
+            front_buttons="centre_row",
+            front_princess_seams="shoulder_pair",
+        )
+        back = build_dress_back_flat(spec)
+        for role in (
+            "dart.front.left",
+            "pocket.front.left",
+            "button.front.1",
+            "princess.front.left",
+        ):
+            with self.subTest(role=role):
+                self.assertEqual(len(back.paths_by_role(role)), 0)
+        self.assertTrue(validate_drawing(back).passed)
+
     def test_explicit_none_and_unspecified_both_draw_no_dart_but_remain_distinct_in_spec(self):
         unspecified = DressSpec(front_darts=None)
         confirmed_none = DressSpec(front_darts="none")
