@@ -30,6 +30,10 @@ class VectorDrawingTests(unittest.TestCase):
     def test_invalid_spec_safe_stops(self):
         with self.assertRaises(ValueError):
             DressSpec(neckline="invented")
+        with self.assertRaises(ValueError):
+            DressSpec(back_neckline="invented")
+        with self.assertRaises(ValueError):
+            DressSpec(back_closure="invented")
 
     def test_prompt_maps_to_controlled_spec(self):
         result = parse_prompt("round-neck short-sleeve midi A-line dress")
@@ -39,6 +43,23 @@ class VectorDrawingTests(unittest.TestCase):
     def test_chinese_prompt_maps_to_controlled_spec(self):
         result = parse_prompt("圓領 短袖 中長 A字 連衣裙")
         self.assertEqual(result.spec, DressSpec(neckline="round", sleeve="short", silhouette="a_line", length="midi"))
+
+    def test_back_prompt_maps_to_explicit_semantics(self):
+        result = parse_prompt(
+            "round-neck short-sleeve midi A-line dress shallow round back neckline centre-back zipper",
+            require_back=True,
+        )
+        self.assertEqual(result.spec.back_neckline, "shallow_round")
+        self.assertEqual(result.spec.back_closure, "centre_zip")
+
+    def test_chinese_back_prompt_maps_to_explicit_semantics(self):
+        result = parse_prompt("圓領 短袖 中長 A字 連衣裙 淺圓後領 後中拉鏈", require_back=True)
+        self.assertEqual(result.spec.back_neckline, "shallow_round")
+        self.assertEqual(result.spec.back_closure, "centre_zip")
+
+    def test_back_prompt_requires_explicit_back_categories(self):
+        with self.assertRaises(PromptParseError):
+            parse_prompt("round-neck short-sleeve midi A-line dress", require_back=True)
 
     def test_prompt_requires_explicit_categories(self):
         with self.assertRaises(PromptParseError):
