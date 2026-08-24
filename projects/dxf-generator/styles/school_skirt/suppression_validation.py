@@ -1,9 +1,10 @@
 """Validation for school-skirt suppression targets and allocations.
 
-The policy-independent draft provides a global half-garment suppression
-requirement. An explicit panel-target policy must first divide that requirement
-between front and back. A later allocation policy then divides each panel target
-between dart intake and side shaping.
+The policy-independent draft provides the canonical quarter-suppression basis.
+Validation derives the corresponding half-garment requirement as twice that
+value. An explicit panel-target policy must first divide the half-garment
+requirement between front and back. A later allocation policy then divides each
+panel target between dart intake and side shaping.
 
 This validator chooses neither policy and provides no equal-quarter fallback.
 All values use millimetres (mm).
