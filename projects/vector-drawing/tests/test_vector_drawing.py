@@ -34,6 +34,10 @@ class VectorDrawingTests(unittest.TestCase):
             DressSpec(back_neckline="invented")
         with self.assertRaises(ValueError):
             DressSpec(back_closure="invented")
+        with self.assertRaises(ValueError):
+            DressSpec(front_darts="invented")
+        with self.assertRaises(ValueError):
+            DressSpec(back_darts="invented")
 
     def test_prompt_maps_to_controlled_spec(self):
         result = parse_prompt("round-neck short-sleeve midi A-line dress")
@@ -56,6 +60,32 @@ class VectorDrawingTests(unittest.TestCase):
         result = parse_prompt("圓領 短袖 中長 A字 連衣裙 淺圓後領 後中拉鏈", require_back=True)
         self.assertEqual(result.spec.back_neckline, "shallow_round")
         self.assertEqual(result.spec.back_closure, "centre_zip")
+
+    def test_prompt_maps_front_and_back_darts_without_guessing(self):
+        result = parse_prompt(
+            "round-neck short-sleeve midi A-line dress front waist darts shallow round back neckline centre-back zipper back waist darts",
+            require_back=True,
+        )
+        self.assertEqual(result.spec.front_darts, "waist_pair")
+        self.assertEqual(result.spec.back_darts, "waist_pair")
+
+    def test_chinese_prompt_maps_front_and_back_darts(self):
+        result = parse_prompt(
+            "圓領 短袖 中長 A字 連衣裙 前腰省 淺圓後領 後中拉鏈 後腰省",
+            require_back=True,
+        )
+        self.assertEqual(result.spec.front_darts, "waist_pair")
+        self.assertEqual(result.spec.back_darts, "waist_pair")
+
+    def test_prompt_preserves_unspecified_vs_explicit_no_darts(self):
+        unspecified = parse_prompt("round-neck short-sleeve midi A-line dress")
+        explicit_none = parse_prompt("round-neck short-sleeve midi A-line dress no front darts")
+        self.assertIsNone(unspecified.spec.front_darts)
+        self.assertEqual(explicit_none.spec.front_darts, "none")
+
+    def test_prompt_rejects_conflicting_dart_semantics(self):
+        with self.assertRaises(PromptParseError):
+            parse_prompt("round-neck short-sleeve midi A-line dress front waist darts no front darts")
 
     def test_back_prompt_requires_explicit_back_categories(self):
         with self.assertRaises(PromptParseError):
