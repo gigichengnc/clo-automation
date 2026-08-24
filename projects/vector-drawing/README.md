@@ -13,13 +13,15 @@ semantic drawing model
         ↓
 deterministic geometry
         ↓
+geometry cleanliness validation
+        ↓
 SVG (authoritative illustration)
 DXF (CAD-friendly artwork export)
 ```
 
 ## Why
 
-Raster image generation is good at visual ideation but unreliable for technical line quality. It can create doubled contours, waviness, accidental asymmetry and inconsistent construction details. This prototype replaces pixel guessing with named curves and explicit symmetry.
+Raster image generation is good at visual ideation but unreliable for technical line quality. It can create doubled contours, waviness, accidental asymmetry and inconsistent construction details. This prototype replaces pixel guessing with named curves, explicit symmetry and testable geometry rules.
 
 ## v0.1 scope
 
@@ -67,6 +69,30 @@ The first is underspecified, the second is contradictory, and the third contains
 
 This boundary is intentional: a future LLM/image-understanding layer may propose semantics, but only validated supported values may reach the geometry engine.
 
+## Geometry cleanliness validation
+
+`vector_drawing.validation.validate_drawing()` currently checks:
+
+- zero-length / collapsed segments;
+- duplicate geometry, including reversed duplicates;
+- intra-path self-intersection;
+- exact left/right mirror symmetry for paired semantic roles;
+- expected semantic endpoint joins between neckline, shoulder, armhole/sleeve, side and hem;
+- tangent continuity at smooth round-neck cubic joins.
+
+The validator returns a structured report with issue codes such as:
+
+```text
+ZERO_LENGTH_SEGMENT
+DUPLICATE_GEOMETRY
+SELF_INTERSECTION
+SYMMETRY_MISMATCH
+ENDPOINT_DISCONTINUITY
+CURVE_TANGENT_DISCONTINUITY
+```
+
+This makes line cleanliness an engineering property rather than a visual guess.
+
 ## Run
 
 From this directory with a JSON spec:
@@ -82,6 +108,16 @@ Or with a strict prompt:
 ```bash
 python -m vector_drawing.cli \
   --prompt "round-neck short-sleeve midi A-line dress" \
+  --svg out/dress.svg \
+  --dxf out/dress.dxf
+```
+
+Add `--validate` to run the cleanliness gate before outputs are written:
+
+```bash
+python -m vector_drawing.cli \
+  --prompt "round-neck short-sleeve midi A-line dress" \
+  --validate \
   --svg out/dress.svg \
   --dxf out/dress.dxf
 ```
@@ -103,8 +139,9 @@ SVG is the authoritative illustration output in v0.1.
 ## Next milestones
 
 1. **DONE v0.1:** strict semantic prompt parser with safe-stop behavior;
-2. front + back flats and richer construction vocabulary;
-3. curve continuity / self-intersection validators;
-4. semantic raster-to-vector cleanup from AI reference images;
-5. shared geometry kernel with garment-pattern code where semantics genuinely overlap;
-6. optional production-pattern mapping only after illustration and manufacturing semantics are explicitly separated.
+2. **DONE v0.1:** first geometry-cleanliness validator and optional CLI validation gate;
+3. front + back flats and richer construction vocabulary;
+4. broader continuity / cross-path intersection policies as vocabulary expands;
+5. semantic raster-to-vector cleanup from AI reference images;
+6. shared geometry kernel with garment-pattern code where semantics genuinely overlap;
+7. optional production-pattern mapping only after illustration and manufacturing semantics are explicitly separated.
