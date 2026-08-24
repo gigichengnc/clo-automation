@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from .flat_details import build_waist_dart_pair
 from .model import Cubic, Drawing, Line, Move, Point, SemanticPath
 
 
@@ -21,6 +22,8 @@ class DressSpec:
     length: str = "midi"          # mini | knee | midi | maxi
     back_neckline: str | None = None   # same_as_front | shallow_round
     back_closure: str | None = None    # none | centre_zip
+    front_darts: str | None = None     # none | waist_pair; None = unspecified
+    back_darts: str | None = None      # none | waist_pair; None = unspecified
 
     def __post_init__(self) -> None:
         allowed = {
@@ -32,6 +35,8 @@ class DressSpec:
         optional_allowed = {
             "back_neckline": ({"same_as_front", "shallow_round"}, self.back_neckline),
             "back_closure": ({"none", "centre_zip"}, self.back_closure),
+            "front_darts": ({"none", "waist_pair"}, self.front_darts),
+            "back_darts": ({"none", "waist_pair"}, self.back_darts),
         }
         for name, (options, value) in allowed.items():
             if value not in options:
@@ -152,6 +157,9 @@ def build_dress_flat(spec: DressSpec) -> Drawing:
         layer="guide",
     )
     paths.extend([centre, waist_guide])
+
+    if spec.front_darts == "waist_pair":
+        paths.extend(build_waist_dart_pair(view="front", waist_y=waist_y))
 
     return Drawing(
         drawing_id=f"dress-{spec.neckline}-{spec.sleeve}-{spec.silhouette}-{spec.length}",
