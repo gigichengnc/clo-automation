@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import replace
-
 from .fashion_flat import DressSpec, build_dress_flat
 from .model import Cubic, Drawing, Line, Move, Point, SemanticPath
 
