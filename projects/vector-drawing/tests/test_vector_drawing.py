@@ -2,6 +2,7 @@ import unittest
 
 from vector_drawing.dxf import render_dxf
 from vector_drawing.fashion_flat import DressSpec, build_dress_flat
+from vector_drawing.prompt import PromptParseError, parse_prompt
 from vector_drawing.svg import render_svg
 
 
@@ -29,6 +30,27 @@ class VectorDrawingTests(unittest.TestCase):
     def test_invalid_spec_safe_stops(self):
         with self.assertRaises(ValueError):
             DressSpec(neckline="invented")
+
+    def test_prompt_maps_to_controlled_spec(self):
+        result = parse_prompt("round-neck short-sleeve midi A-line dress")
+        self.assertEqual(result.garment, "dress")
+        self.assertEqual(result.spec, DressSpec(neckline="round", sleeve="short", silhouette="a_line", length="midi"))
+
+    def test_chinese_prompt_maps_to_controlled_spec(self):
+        result = parse_prompt("圓領 短袖 中長 A字 連衣裙")
+        self.assertEqual(result.spec, DressSpec(neckline="round", sleeve="short", silhouette="a_line", length="midi"))
+
+    def test_prompt_requires_explicit_categories(self):
+        with self.assertRaises(PromptParseError):
+            parse_prompt("a nice midi dress")
+
+    def test_prompt_rejects_conflicting_semantics(self):
+        with self.assertRaises(PromptParseError):
+            parse_prompt("round-neck V-neck short-sleeve midi A-line dress")
+
+    def test_prompt_rejects_unsupported_feature(self):
+        with self.assertRaises(PromptParseError):
+            parse_prompt("round-neck long-sleeve midi A-line dress")
 
 
 if __name__ == "__main__":
