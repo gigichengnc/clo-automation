@@ -8,6 +8,7 @@ from .dxf import render_dxf
 from .fashion_flat import DressSpec, build_dress_flat
 from .prompt import PromptParseError, parse_prompt
 from .svg import render_svg
+from .validation import validate_drawing
 
 
 def _load_spec(spec_path: Path | None, prompt: str | None) -> DressSpec:
@@ -38,10 +39,23 @@ def main() -> None:
     parser.add_argument("--prompt", help="strict natural-language garment description")
     parser.add_argument("--svg", type=Path, required=True, help="SVG output path")
     parser.add_argument("--dxf", type=Path, help="optional standard DXF artwork output")
+    parser.add_argument(
+        "--validate",
+        action="store_true",
+        help="run geometry cleanliness validation before writing outputs",
+    )
     args = parser.parse_args()
 
     spec = _load_spec(args.spec, args.prompt)
     drawing = build_dress_flat(spec)
+
+    if args.validate:
+        report = validate_drawing(drawing)
+        if not report.passed:
+            details = "; ".join(f"{issue.code}: {issue.message}" for issue in report.issues)
+            raise SystemExit(f"geometry validation failed: {details}")
+        print("geometry validation: PASS")
+
     args.svg.parent.mkdir(parents=True, exist_ok=True)
     args.svg.write_text(render_svg(drawing), encoding="utf-8")
     if args.dxf:
