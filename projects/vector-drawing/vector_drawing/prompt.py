@@ -39,6 +39,38 @@ _ALIASES: dict[str, dict[str, tuple[str, ...]]] = {
         "midi": (r"\bmidi\b", r"中長", r"中长"),
         "maxi": (r"\bmaxi\b", r"及踝", r"長款", r"长款"),
     },
+    "back_neckline": {
+        "same_as_front": (
+            r"\bback[ -]?neck(?:line)?[ -]same[ -]as[ -]front\b",
+            r"\bsame[ -]front[ -]and[ -]back[ -]?neck(?:line)?\b",
+            r"前後領相同",
+            r"前后领相同",
+        ),
+        "shallow_round": (
+            r"\bshallow[ -]round[ -]back[ -]?neck(?:line)?\b",
+            r"\bshallow[ -]back[ -]?neck(?:line)?\b",
+            r"淺圓後領",
+            r"浅圆后领",
+            r"淺後領",
+            r"浅后领",
+        ),
+    },
+    "back_closure": {
+        "none": (
+            r"\bno[ -]back[ -](?:closure|zip|zipper)\b",
+            r"\bback[ -]closure[ -]none\b",
+            r"後背無拉鏈",
+            r"后背无拉链",
+            r"無後開合",
+            r"无后开合",
+        ),
+        "centre_zip": (
+            r"\b(?:centre|center)[ -]?back[ -]?(?:zip|zipper)\b",
+            r"\bback[ -](?:centre|center)[ -]?(?:zip|zipper)\b",
+            r"後中拉鏈",
+            r"后中拉链",
+        ),
+    },
 }
 
 # These phrases are deliberately rejected rather than silently simplified to a
@@ -68,11 +100,24 @@ def _matches(text: str, category: str) -> list[str]:
     return found
 
 
-def parse_prompt(text: str) -> PromptParseResult:
+def _resolve_category(text: str, category: str, *, required: bool) -> str | None:
+    found = _matches(text, category)
+    if len(found) > 1:
+        raise PromptParseError(f"ambiguous {category}: {', '.join(found)}")
+    if not found:
+        if required:
+            raise PromptParseError(f"missing explicit {category}")
+        return None
+    return found[0]
+
+
+def parse_prompt(text: str, *, require_back: bool = False) -> PromptParseResult:
     """Map a garment prompt to the v0.1 DressSpec without hidden defaults.
 
-    Every required semantic category must be stated explicitly. Conflicting or
-    unsupported language safe-stops instead of choosing one interpretation.
+    Front semantic categories must always be explicit. Back categories become
+    mandatory only when a caller requests a back technical flat. Back language
+    is still parsed when present for front requests so contradictions are not
+    silently ignored.
     """
     normalized = " ".join(text.strip().split())
     if not normalized:
@@ -84,20 +129,26 @@ def parse_prompt(text: str) -> PromptParseResult:
 
     resolved: dict[str, str] = {}
     for category in ("garment", "neckline", "sleeve", "silhouette", "length"):
-        found = _matches(normalized, category)
-        if len(found) > 1:
-            raise PromptParseError(f"ambiguous {category}: {', '.join(found)}")
-        if not found:
-            raise PromptParseError(f"missing explicit {category}")
-        resolved[category] = found[0]
+        value = _resolve_category(normalized, category, required=True)
+        assert value is not None
+        resolved[category] = value
 
     if resolved["garment"] != "dress":
         raise PromptParseError(f"unsupported garment: {resolved['garment']}")
+
+    back_neckline = _resolve_category(normalized, "back_neckline", required=require_back)
+    back_closure = _resolve_category(normalized, "back_closure", required=require_back)
+    if back_neckline is not None:
+        resolved["back_neckline"] = back_neckline
+    if back_closure is not None:
+        resolved["back_closure"] = back_closure
 
     spec = DressSpec(
         neckline=resolved["neckline"],
         sleeve=resolved["sleeve"],
         silhouette=resolved["silhouette"],
         length=resolved["length"],
+        back_neckline=back_neckline,
+        back_closure=back_closure,
     )
     return PromptParseResult(garment="dress", spec=spec, matched=resolved)
