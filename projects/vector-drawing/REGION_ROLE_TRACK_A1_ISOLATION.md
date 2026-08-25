@@ -1,9 +1,17 @@
-# Track A.1 — Persistence Gate Isolated and Falsified
+# Track A.1 — Persistence Gate Isolated: No Evidence of Boundary-Role Signal
 
 ## Status
 
 `RESEARCH_PROTOTYPE` / `NOT_PRODUCTION_OUTPUT`
 `SUPERSEDES Finding 3 of REGION_ROLE_TRACK_A_COMPARISON.md`
+`PARTIALLY CORRECTED BY REGION_ROLE_TRACK_A1_2_ROBUSTNESS.md`
+
+> **Revision.** This document originally claimed falsification. Robustness
+> checks in `REGION_ROLE_TRACK_A1_2_ROBUSTNESS.md` show the statistical
+> conclusions were overstated: the interval on persistence cannot exclude a
+> useful effect, `sum_area` has not been shown to beat it, and half the 2x2
+> failure was a cleanup-parameter artefact. The engineering decision stands;
+> the strength of the claims does not. Read that document alongside this one.
 
 ## Question
 
@@ -16,7 +24,7 @@ quality. Track A.1 removes that confound by using the **hand-labelled Track A
 boundaries themselves** as the candidate set. Segmentation is perfect by
 construction; only role assignment is under test.
 
-## Result 1: on a correct partition, persistence is indistinguishable from chance
+## Result 1: on a correct partition, no association is detectable
 
 19 adjacent ground-truth pairs (13 `REGION_BOUNDARY`, 6 `FILL_ONLY`).
 Permutation test, 10 000 label shuffles.
@@ -30,12 +38,21 @@ sum_area          0.769   0.034      0.883   0.016
 tortuosity        0.692   0.106      0.851   0.027
 ```
 
-Persistence is the **weakest** discriminator tested and is not separable from
-random labelling.
+Persistence is the weakest discriminator tested, and the null of no
+association cannot be rejected.
+
+**This is failure to reject, not evidence of equivalence.** A bootstrap
+interval (Track A.1.2) puts persistence at 0.564 [0.269, 0.833], which does not
+exclude a useful effect.
 
 The trivial control `sum_area` — the summed pixel area of the two adjoining
-regions, which uses no image content at all — is significant and beats it by a
-wide margin on both weightings.
+regions, which uses no image content at all — shows the largest observed
+association.
+
+> **Corrected.** Comparing two separate tests against permuted labels does not
+> establish that one score beats another. A paired bootstrap on the difference
+> (Track A.1.2) gives DeltaAUC 0.205 [-0.128, 0.538]: `sum_area` has **not**
+> been shown to outperform persistence.
 
 Matched-budget retention agrees: at every budget from N=2 to N=18, persistence
 retains no more true `REGION_BOUNDARY` pairs than `sum_area` or `tortuosity`,
@@ -60,14 +77,17 @@ small_texture interior bands   TEXTURE            1980     0.469
 small_texture outline          REGION_BOUNDARY     360     0.983
 ```
 
-Both off-diagonal cases fail:
+Both off-diagonal cases fail under the default configuration:
 
 - a genuine silhouette that happens to be **small** scores `0.000` and is
   discarded;
 - pure texture that happens to be **wide-period** scores `0.983` and is kept.
 
-The score ordering tracks feature scale, not structural role. Persistence is a
-low-frequency prior wearing the costume of a structural cue.
+> **Corrected.** Ablation (Track A.1.2) shows the small-structure failure is
+> caused by the coarse-segmentation `min_size` cleanup, not by persistence: at
+> `min_size=0` that outline scores 1.000. The wide-texture failure survives
+> ablation across `min_size`, `blur`, `downscale` and `k`, and is the one
+> genuine scale-prior signature demonstrated here.
 
 ## Retraction
 
@@ -118,9 +138,8 @@ domain.
 - One image, one crop, one annotator.
 - The synthetic fixture is deliberately adversarial. It shows persistence *can*
   fail, not how often it fails on real data.
-- Persistence parameters (blur 5, downscale 4, k 6, dilate 3) were not tuned
-  here. A different coarse-scale configuration might behave differently, though
-  the 2x2 failure mode is structural rather than parametric.
+- Persistence parameters were not tuned here. Ablation in Track A.1.2 later
+  showed one of the two 2x2 failure modes **was** parametric.
 
 ## Next falsification step
 
@@ -138,12 +157,12 @@ If a role cue is wanted later, the honest ordering is:
 
 ## Current conclusion
 
-> Isolated from segmentation, the persistence gate carries no measurable
-> information about whether a region boundary should be drawn. A control using
-> only region area, and no image content, outperforms it significantly. A 2x2
-> synthetic fixture shows it discarding a small silhouette and keeping wide
-> texture bands. The earlier positive result was an artefact of scoring it on
-> an over-segmented partition.
+> On this fixture, the current coarse-scale persistence configuration shows no
+> detectable boundary-role discrimination once segmentation is held fixed. An
+> adversarial synthetic fixture exposes a scale-dependent failure mode that
+> survives parameter ablation. This is sufficient to reject the current
+> heuristic for implementation, but not to establish that every possible
+> persistence formulation is uninformative.
 
 ## Reproduce
 

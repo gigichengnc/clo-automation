@@ -69,13 +69,20 @@ def boundary_pairs(labels):
     return pairs
 
 
-def structure_mask(rgb, shape, blur=5, downscale=4, k=6, dilate=3):
-    """Coarse-scale partition boundaries, upsampled. Survives blur => structural."""
+def structure_mask(rgb, shape, blur=5, downscale=4, k=6, dilate=3, min_size=120):
+    """Coarse-scale partition boundaries, upsampled. Survives blur => structural.
+
+    NOTE: min_size is a cleanup gate on the COARSE raster. Components smaller
+    than it are absorbed before boundaries are traced, so it independently
+    removes small features regardless of scale persistence. Exposed as a
+    parameter so the two effects can be separated; the default preserves the
+    behaviour used in the Track B and Track A probes.
+    """
     h, w = shape
     small = np.stack(
         [ndi.zoom(ndi.gaussian_filter(rgb[..., c], blur), 1 / downscale, order=1) for c in range(3)], -1
     )
-    coarse, _ = segment(small, k, 120, median=5)
+    coarse, _ = segment(small, k, min_size, median=5)
     right = coarse != np.roll(coarse, -1, axis=1)
     right[:, -1] = False
     down = coarse != np.roll(coarse, -1, axis=0)

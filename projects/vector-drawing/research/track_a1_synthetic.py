@@ -72,6 +72,30 @@ def group_of(a, b, role):
     return "?"
 
 
+def evaluate(**mask_kwargs):
+    """Return {group: (role, cells, persistence)} for one structure_mask config."""
+    img, labels, names, roles = build()
+    sm = structure_mask(img, labels.shape, **mask_kwargs)
+    cells = {}
+    for arr, dy, dx in ((labels != np.roll(labels, -1, 1), 0, 1),
+                        (labels != np.roll(labels, -1, 0), 1, 0)):
+        arr = arr.copy()
+        if dx:
+            arr[:, -1] = False
+        else:
+            arr[-1, :] = False
+        for y, x in zip(*np.nonzero(arr)):
+            cells.setdefault(tuple(sorted((labels[y, x], labels[y + dy, x + dx]))), []).append((y, x))
+    groups = {}
+    for key, cs in cells.items():
+        role = roles.get(key) or roles.get((key[1], key[0]))
+        if role is None:
+            continue
+        groups.setdefault((group_of(names[key[0]], names[key[1]], role), role), []).extend(cs)
+    return {g: (r, len(cs), float(np.mean([sm[y, x] for y, x in cs])))
+            for (g, r), cs in groups.items()}
+
+
 def main():
     img, labels, names, roles = build()
     sm = structure_mask(img, labels.shape)
