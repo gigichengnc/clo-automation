@@ -1,0 +1,294 @@
+{
+  "size": [
+    560,
+    480
+  ],
+  "layers": [
+    {
+      "name": "sky_bright",
+      "id": 1,
+      "polygon": [
+        [
+          0,
+          0
+        ],
+        [
+          560,
+          0
+        ],
+        [
+          560,
+          480
+        ],
+        [
+          0,
+          480
+        ]
+      ]
+    },
+    {
+      "name": "cloud_dark",
+      "id": 2,
+      "polygon": [
+        [
+          0,
+          0
+        ],
+        [
+          240,
+          0
+        ],
+        [
+          258,
+          42
+        ],
+        [
+          192,
+          68
+        ],
+        [
+          232,
+          96
+        ],
+        [
+          120,
+          120
+        ],
+        [
+          0,
+          102
+        ]
+      ]
+    },
+    {
+      "name": "cloud_mid",
+      "id": 3,
+      "polygon": [
+        [
+          248,
+          52
+        ],
+        [
+          332,
+          42
+        ],
+        [
+          392,
+          78
+        ],
+        [
+          402,
+          140
+        ],
+        [
+          358,
+          192
+        ],
+        [
+          298,
+          176
+        ],
+        [
+          252,
+          118
+        ]
+      ]
+    },
+    {
+      "name": "sky_haze_left",
+      "id": 4,
+      "polygon": [
+        [
+          0,
+          102
+        ],
+        [
+          120,
+          120
+        ],
+        [
+          96,
+          342
+        ],
+        [
+          0,
+          342
+        ]
+      ]
+    },
+    {
+      "name": "ridge",
+      "id": 5,
+      "polygon": [
+        [
+          0,
+          332
+        ],
+        [
+          96,
+          328
+        ],
+        [
+          200,
+          350
+        ],
+        [
+          342,
+          332
+        ],
+        [
+          402,
+          344
+        ],
+        [
+          402,
+          412
+        ],
+        [
+          0,
+          412
+        ]
+      ]
+    },
+    {
+      "name": "tower_right",
+      "id": 6,
+      "polygon": [
+        [
+          388,
+          96
+        ],
+        [
+          560,
+          88
+        ],
+        [
+          560,
+          480
+        ],
+        [
+          388,
+          480
+        ]
+      ]
+    },
+    {
+      "name": "bldg_right_low",
+      "id": 7,
+      "polygon": [
+        [
+          430,
+          214
+        ],
+        [
+          560,
+          208
+        ],
+        [
+          560,
+          480
+        ],
+        [
+          430,
+          480
+        ]
+      ]
+    },
+    {
+      "name": "tower_mid",
+      "id": 8,
+      "polygon": [
+        [
+          250,
+          166
+        ],
+        [
+          360,
+          166
+        ],
+        [
+          360,
+          480
+        ],
+        [
+          250,
+          480
+        ]
+      ]
+    },
+    {
+      "name": "tower_left",
+      "id": 9,
+      "polygon": [
+        [
+          64,
+          126
+        ],
+        [
+          250,
+          126
+        ],
+        [
+          250,
+          480
+        ],
+        [
+          64,
+          480
+        ]
+      ]
+    },
+    {
+      "name": "foreground",
+      "id": 10,
+      "polygon": [
+        [
+          0,
+          400
+        ],
+        [
+          232,
+          400
+        ],
+        [
+          232,
+          480
+        ],
+        [
+          0,
+          480
+        ]
+      ]
+    }
+  ],
+  "roles": {
+    "sky_bright|cloud_dark": "FILL_ONLY",
+    "sky_bright|cloud_mid": "FILL_ONLY",
+    "cloud_dark|cloud_mid": "FILL_ONLY",
+    "sky_bright|sky_haze_left": "FILL_ONLY",
+    "cloud_dark|sky_haze_left": "FILL_ONLY",
+    "sky_bright|ridge": "FILL_ONLY",
+    "sky_haze_left|ridge": "FILL_ONLY",
+    "cloud_mid|ridge": "FILL_ONLY",
+    "sky_bright|tower_right": "REGION_BOUNDARY",
+    "cloud_mid|tower_right": "REGION_BOUNDARY",
+    "ridge|tower_right": "REGION_BOUNDARY",
+    "tower_right|bldg_right_low": "REGION_BOUNDARY",
+    "sky_bright|tower_mid": "REGION_BOUNDARY",
+    "cloud_mid|tower_mid": "REGION_BOUNDARY",
+    "ridge|tower_mid": "REGION_BOUNDARY",
+    "sky_bright|tower_left": "REGION_BOUNDARY",
+    "cloud_dark|tower_left": "REGION_BOUNDARY",
+    "cloud_mid|tower_left": "REGION_BOUNDARY",
+    "sky_haze_left|tower_left": "REGION_BOUNDARY",
+    "ridge|tower_left": "REGION_BOUNDARY",
+    "tower_left|tower_mid": "REGION_BOUNDARY",
+    "tower_mid|tower_right": "REGION_BOUNDARY",
+    "tower_mid|ridge": "REGION_BOUNDARY",
+    "foreground|tower_left": "REGION_BOUNDARY",
+    "foreground|sky_haze_left": "REGION_BOUNDARY",
+    "foreground|ridge": "REGION_BOUNDARY",
+    "foreground|tower_mid": "REGION_BOUNDARY"
+  },
+  "note": "facade window bands are intentionally NOT regions; a facade is one region carrying texture"
+}

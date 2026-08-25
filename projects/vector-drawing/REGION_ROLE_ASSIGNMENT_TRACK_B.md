@@ -195,3 +195,10 @@ python projects/vector-drawing/research/region_role_track_b.py \
   --image path/to/image.jpg \
   --out out/track-b
 ```
+
+## Follow-up
+
+See `REGION_ROLE_TRACK_A_COMPARISON.md`. The Track A comparison corrects the
+significance claim made here: most of the 72% reduction was over-segmentation
+artefact rather than reclassified texture, and segmentation — not role
+assignment — is the measured bottleneck.
