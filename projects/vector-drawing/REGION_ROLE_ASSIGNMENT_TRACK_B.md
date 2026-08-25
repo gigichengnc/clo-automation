@@ -202,3 +202,8 @@ See `REGION_ROLE_TRACK_A_COMPARISON.md`. The Track A comparison corrects the
 significance claim made here: most of the 72% reduction was over-segmentation
 artefact rather than reclassified texture, and segmentation — not role
 assignment — is the measured bottleneck.
+
+> **RETRACTED.** See `REGION_ROLE_TRACK_A1_FALSIFICATION.md`. Isolated from
+> segmentation, persistence carries no measurable signal (macro AUC 0.564,
+> p=0.35) and is beaten by a region-area control that reads no image content.
+> Finding 2 above is withdrawn.

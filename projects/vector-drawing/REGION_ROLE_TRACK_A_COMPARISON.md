@@ -168,3 +168,8 @@ Do not attach the proposer to `region_partition.py` until recall is credible.
 python projects/vector-drawing/research/track_a_fixture.py
 python projects/vector-drawing/research/track_ab_compare.py --image crop.png
 ```
+
+> **Finding 3 RETRACTED.** See `REGION_ROLE_TRACK_A1_FALSIFICATION.md`. The
+> monotonic precision gain was real but misattributed: persistence suppresses
+> small-scale boundaries, and on an over-segmented partition most spurious
+> boundaries are small. Findings 1 and 2 stand.
